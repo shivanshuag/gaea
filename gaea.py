@@ -23,4 +23,11 @@ if len(args.all) == 1:
         except Exception, e:
             print 'exception'
             print e
+if len(args.all) == 2:
+    if args.all[0] == 'snap':
+        try:
+            repo.LoadRepo()
+            commit.snap(args.all[1])
+        except Exception, e:
+            print e
 

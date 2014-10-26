@@ -9,7 +9,7 @@ def LoadRepo():
         dataMap = yaml.safe_load(f)
         f.close()
         if(dataMap['HEAD'] >= 0 and dataMap['latestId'] >= 0):
-            return dataMap
+            globals.REPOINFO = dataMap
         else:
             raise Exception('Not a Gaea Repository')
     else:
@@ -17,14 +17,19 @@ def LoadRepo():
 
 def init():
     try:
-        repo = LoadRepo()
+        LoadRepo()
         print 'Already a repository'
         exit(0)
     except Exception, e:
         if not os.path.exists(globals.ROOT+'/.gaea'):
             os.makedirs(globals.ROOT+'/.gaea')
-        yamlFile = globals.ROOT+'/.gaea/gaea.yml'
-        f = open(yamlFile, 'w')
+        if not os.path.exists(globals.ROOT+'/.gaea/snaps'):
+            os.makedirs(globals.ROOT+'/.gaea/snaps')
         dataMap = {'HEAD':0, 'latestId':0 }
-        yaml.dump(dataMap, f, default_flow_style=False)
-        f.close()
+        dump(dataMap)
+
+def dump(data):
+    yamlFile = globals.ROOT+'/.gaea/gaea.yml'
+    f = open(yamlFile, 'w')
+    yaml.dump(data, f, default_flow_style=False)
+    f.close()
