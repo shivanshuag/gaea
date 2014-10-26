@@ -21,7 +21,12 @@ if len(args.all) == 1:
         try:
             repo.init()
         except Exception, e:
-            print 'exception'
+            print e
+    if args.all[0] == 'diff':
+        try:
+            repo.LoadRepo()
+            print repo.diff()
+        except Exception, e:
             print e
 if len(args.all) == 2:
     if args.all[0] == 'snap':
