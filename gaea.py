@@ -28,11 +28,23 @@ if len(args.all) == 1:
             print repo.diff()
         except Exception, e:
             print e
+    if args.all[0] == 'log':
+        try:
+            repo.LoadRepo()
+            print repo.log()
+        except Exception, e:
+            print e
 if len(args.all) == 2:
     if args.all[0] == 'snap':
         try:
             repo.LoadRepo()
             commit.snap(args.all[1])
         except Exception, e:
+            print e
+    if args.all[0] == 'restore':
+        try:
+            repo.LoadRepo()
+            commit.restore(args.all[1])
+        except Exception,e:
             print e
 

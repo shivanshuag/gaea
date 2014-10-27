@@ -47,6 +47,15 @@ def diff():
             f2.close()
      return difference
 
+
+def log():
+    parent = globals.REPOINFO['latestId']
+    log = ''
+    while parent in globals.REPOINFO.keys():
+        log = log + str(parent) + ':\t' + globals.REPOINFO[parent]['message'] + '\n\n\n'
+        parent = globals.REPOINFO[int(parent)]['parent']
+    return log
+
 def dump(data):
     yamlFile = globals.ROOT+'/.gaea/gaea.yml'
     f = open(yamlFile, 'w')
