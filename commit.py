@@ -2,6 +2,7 @@ import globals
 import os
 import shutil
 import repo
+from datetime import datetime
 
 def snap(message):
     if not repo.diff():
@@ -10,7 +11,7 @@ def snap(message):
     head = globals.REPOINFO['HEAD']
     globals.REPOINFO['latestId'] = snapId
     globals.REPOINFO['HEAD'] = head+1
-    globals.REPOINFO[snapId] = {'parent': head, 'message': message }
+    globals.REPOINFO[snapId] = {'parent': head, 'message': message, 'time': str(datetime.now()), 'author': '' }
     if head > 0:
         globals.REPOINFO[head]['child'] = snapId
     snapDir = os.path.join(globals.ROOT,'.gaea','snaps',str(snapId))

@@ -25,7 +25,14 @@ if len(args.all) == 1:
     if args.all[0] == 'diff':
         try:
             repo.LoadRepo()
-            print repo.diff()
+            diff = repo.diff()
+            for line in iter(diff.splitlines()):
+                if line[0]=='+' and line[1]!='+':
+                    puts(colored.red(line))
+                elif line[0]=='-' and line[2]!='-':
+                    puts(colored.green(line))
+                else:
+                    puts(colored.white(line, False, True))
         except Exception, e:
             print e
     if args.all[0] == 'log':
@@ -47,4 +54,27 @@ if len(args.all) == 2:
             commit.restore(args.all[1])
         except Exception,e:
             print e
+if len(args.all) > 2:
+    if args.all[0] == 'set':
+        if args.all[1] == 'author':
+            try:
+                repo.LoadRepo()
+                repo.setAuthor(args.all[2])
+            except Exception,e:
+                print e
+        if args.all[1] == 'email':
+            try:
+                repo.LoadRepo()
+                repo.setEmail(args.all[2])
+            except Exception, e:
+                print e
 
+        if args.all[1] == 'remote':
+            if(len(args.all) < 4):
+                print 'missing arguments'
+                exit(0)
+            try:
+                repo.LoadRepo()
+                repo.setRemote(args.all[2], args.all[3])
+            except Exception, e:
+                print e
