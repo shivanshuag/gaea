@@ -6,6 +6,7 @@ import os
 #import all the commands
 import repo
 import commit
+import remote
 import globals
 
 #import clint libraries
@@ -52,6 +53,11 @@ if len(args.all) == 2:
         try:
             repo.LoadRepo()
             commit.restore(args.all[1])
+        except Exception,e:
+            print e
+    if args.all[0] == 'clone':
+        try:
+            remote.clone(args.all[1])
         except Exception,e:
             print e
 if len(args.all) > 2:
