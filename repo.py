@@ -6,6 +6,7 @@ import difflib
 def LoadRepo():
     yamlFile = globals.ROOT+'/.gaea/gaea.yml'
     if os.path.exists(yamlFile):
+        print 'load repo : '+yamlFile+'path exists'
         f = open(yamlFile)
         dataMap = yaml.safe_load(f)
         f.close()
@@ -28,6 +29,8 @@ def init():
             os.makedirs(globals.ROOT+'/.gaea/snaps')
         dataMap = {'HEAD':0, 'latestId':0, 'author': '', 'email': '', 'remote':{} }
         dump(dataMap)
+        print "new repo created"
+
 
 def diff():
      head = globals.REPOINFO['HEAD']
