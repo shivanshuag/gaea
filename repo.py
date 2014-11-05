@@ -10,10 +10,7 @@ def LoadRepo():
         f = open(yamlFile)
         dataMap = yaml.safe_load(f)
         f.close()
-        if(dataMap['HEAD'] >= 0 and dataMap['latestId'] >= 0):
-            globals.REPOINFO = dataMap
-        else:
-            raise Exception('Not a Gaea Repository')
+        globals.REPOINFO = dataMap
     else:
         raise Exception('Not a Gaea Repository')
 
@@ -27,14 +24,14 @@ def init():
             os.makedirs(globals.ROOT+'/.gaea')
         if not os.path.exists(globals.ROOT+'/.gaea/snaps'):
             os.makedirs(globals.ROOT+'/.gaea/snaps')
-        dataMap = {'HEAD':0, 'latestId':0, 'author': '', 'email': '', 'remote':{} }
+        dataMap = {'HEAD':'0', 'latestId':'0', 'author': '', 'email': '', 'remote':{} }
         dump(dataMap)
         print "new repo created"
 
 
 def diff():
      head = globals.REPOINFO['HEAD']
-     if head > 0:
+     if head != '0':
          headDir = os.path.join(globals.ROOT,'.gaea', 'snaps', str(head))
          difference = ''
          for root, subFolders, files in os.walk(globals.ROOT):
@@ -58,8 +55,8 @@ def log():
     parent = globals.REPOINFO['latestId']
     log = ''
     while parent in globals.REPOINFO.keys():
-        log = log + str(parent) + ':\t' + globals.REPOINFO[parent]['message'] + '\n\n\n'
-        parent = globals.REPOINFO[int(parent)]['parent']
+        log = log + str(parent) + ':\tMessage - ' + globals.REPOINFO[parent]['message'] + '\n\tAuthor - '+globals.REPOINFO[parent]['author']+'\n\tTime-'+globals.REPOINFO[parent]['time']+'\n\n'
+        parent = globals.REPOINFO[parent]['parent']
     return log
 
 def setAuthor(author):
