@@ -2,11 +2,12 @@ import yaml
 import os
 import globals
 import difflib
+import commit
 
 def LoadRepo():
     yamlFile = globals.ROOT+'/.gaea/gaea.yml'
     if os.path.exists(yamlFile):
-        print 'load repo : '+yamlFile+'path exists'
+        #print 'load repo : '+yamlFile+'path exists'
         f = open(yamlFile)
         dataMap = yaml.safe_load(f)
         f.close()
@@ -29,26 +30,61 @@ def init():
         print "new repo created"
 
 
-def diff():
-     head = globals.REPOINFO['HEAD']
-     if head != '0':
-         headDir = os.path.join(globals.ROOT,'.gaea', 'snaps', str(head))
-         difference = ''
-         for root, subFolders, files in os.walk(globals.ROOT):
+def diff(id1=None,id2=None):
+    head = globals.REPOINFO['HEAD']
+    if head != '0':
+        if id1 == None:
+            dir1 = os.path.join(globals.ROOT,'.gaea', 'snaps', head)
+        else:
+            id1 = commit.getFullSnapId(id1)
+            dir1 = os.path.join(globals.ROOT, '.gaea', 'snaps', id1)
+        if id2 == None:
+            dir2 = globals.ROOT
+        else:
+            id2 = commit.getFullSnapId(id2)
+            dir2 = os.path.join(globals.ROOT, '.gaea', 'snaps', id2)
+
+        difference = ''
+        filesDone = []
+        for root, subFolders, files in os.walk(dir2):
             if '.gaea' in subFolders:
                 subFolders.remove('.gaea')
             for f in files:
-                filePath = os.path.join(root, f)
-                headFilePath = os.path.join(headDir, os.path.relpath(root, globals.ROOT), f)
-                f1 = open(filePath, 'r')
-                f2 = open(headFilePath, 'r')
-                unifiedDiff = difflib.unified_diff(f2.readlines(), f1.readlines(), fromfile=headFilePath, tofile=filePath)
+                filesDone.append(os.path.join(os.path.relpath(root, dir2),f))
+                filePath1 = os.path.join(dir1, os.path.relpath(root, dir2), f)
+                filePath2 = os.path.join(root, f)
+                if os.path.isfile(filePath1) and os.path.isfile(filePath2):
+                    file1 = open(filePath1, 'r')
+                    f1 = file1.readlines()
+                    file2 = open(filePath2, 'r')
+                    f2 = file2.readlines()
+                    file1.close()
+                    file2.close()
+                elif os.path.isfile(filePath2):
+                    file2 = open(filePath2, 'r')
+                    f2 = file2.readlines()
+                    f1 = ''
+                    file2.close()
+                unifiedDiff = difflib.unified_diff(f1, f2, fromfile=filePath1, tofile=filePath2)
                 difference = difference + ''.join(unifiedDiff)
-                f1.close()
-                f2.close()
-     else:
+        for root, subFolders, files in os.walk(dir1):
+            if '.gaea' in subFolders:
+                subFolders.remove('.gaea')
+            for f in files:
+                if os.path.join(os.path.relpath(root, dir1), f) not in filesDone:
+                    filePath1 = os.path.join(root, f)
+                    filePath2 = os.path.join(dir2, os.path.relpath(root, dir2), f)
+                    file1 = open(filePath1, 'r')
+                    f1 = file1.readlines()
+                    f2 = ''
+                    file1.close()
+                    unifiedDiff = difflib.unified_diff(f1, f2, fromfile=filePath1, tofile=filePath2)
+                    difference = difference + ''.join(unifiedDiff)
+
+
+    else:
          difference = 'No snapshot has been taken so far'
-     return difference
+    return difference
 
 
 def log():

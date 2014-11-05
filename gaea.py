@@ -49,6 +49,19 @@ elif len(args.all) == 2:
             commit.restore(args.all[1])
         except Exception,e:
             print e
+    elif args.all[0] == 'diff':
+        try:
+            repo.LoadRepo()
+            diff = repo.diff(id1=args.all[1])
+            for line in iter(diff.splitlines()):
+                if line[0]=='+' and line[1]!='+':
+                    puts(colored.green(line))
+                elif line[0]=='-' and line[2]!='-':
+                    puts(colored.red(line))
+                else:
+                    puts(colored.white(line, False, True))
+        except Exception,e:
+            print e
     elif args.all[0] == 'clone':
         try:
             remote.clone(args.all[1])
@@ -74,6 +87,19 @@ elif len(args.all) == 3:
             repo.LoadRepo()
             commit.snap(args.all[1], args.all[2])
         except Exception, e:
+            print e
+    elif args.all[0] == 'diff':
+        try:
+            repo.LoadRepo()
+            diff = repo.diff(id1=args.all[1], id2=args.all[2])
+            for line in iter(diff.splitlines()):
+                if line[0]=='+' and line[1]!='+':
+                    puts(colored.green(line))
+                elif line[0]=='-' and line[2]!='-':
+                    puts(colored.red(line))
+                else:
+                    puts(colored.white(line, False, True))
+        except Exception,e:
             print e
     elif args.all[0] == 'set':
         if args.all[1] == 'author':
