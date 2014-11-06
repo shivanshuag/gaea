@@ -49,6 +49,11 @@ elif len(args.all) == 2:
             commit.restore(args.all[1])
         except Exception,e:
             print e
+    elif args.all[0] == 'merge':
+        #try:
+            repo.LoadRepo()
+            remote.merge(args.all[1],'address')
+
     elif args.all[0] == 'diff':
         try:
             repo.LoadRepo()

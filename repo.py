@@ -5,7 +5,7 @@ import difflib
 import commit
 
 def readFile(path):
-    output = ''
+    output = []
     if os.path.isfile(path):
         f1 = open(path, 'r')
         output = f1.readlines()
@@ -51,7 +51,6 @@ def diff(id1=None,id2=None):
         else:
             id2 = commit.getFullSnapId(id2)
             dir2 = os.path.join(globals.ROOT, '.gaea', 'snaps', id2)
-
         difference = ''
         filesDone = []
         for root, subFolders, files in os.walk(dir2):
@@ -71,7 +70,7 @@ def diff(id1=None,id2=None):
             for f in files:
                 if os.path.join(os.path.relpath(root, dir1), f) not in filesDone:
                     filePath1 = os.path.join(root, f)
-                    filePath2 = os.path.join(dir2, os.path.relpath(root, dir2), f)
+                    filePath2 = os.path.join(dir2, os.path.relpath(root, dir1), f)
                     f1 = readFile(filePath1)
                     f2 = readFile(filePath2)
                     unifiedDiff = difflib.unified_diff(f1, f2, fromfile=filePath1, tofile=filePath2)
