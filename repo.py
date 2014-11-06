@@ -4,6 +4,14 @@ import globals
 import difflib
 import commit
 
+def readFile(path):
+    output = ''
+    if os.path.isfile(path):
+        f1 = open(path, 'r')
+        output = f1.readlines()
+        f1.close()
+    return output
+
 def LoadRepo():
     yamlFile = globals.ROOT+'/.gaea/gaea.yml'
     if os.path.exists(yamlFile):
@@ -53,18 +61,8 @@ def diff(id1=None,id2=None):
                 filesDone.append(os.path.join(os.path.relpath(root, dir2),f))
                 filePath1 = os.path.join(dir1, os.path.relpath(root, dir2), f)
                 filePath2 = os.path.join(root, f)
-                if os.path.isfile(filePath1) and os.path.isfile(filePath2):
-                    file1 = open(filePath1, 'r')
-                    f1 = file1.readlines()
-                    file2 = open(filePath2, 'r')
-                    f2 = file2.readlines()
-                    file1.close()
-                    file2.close()
-                elif os.path.isfile(filePath2):
-                    file2 = open(filePath2, 'r')
-                    f2 = file2.readlines()
-                    f1 = ''
-                    file2.close()
+                f1 = readFile(filePath1)
+                f2 = readFile(filePath2)
                 unifiedDiff = difflib.unified_diff(f1, f2, fromfile=filePath1, tofile=filePath2)
                 difference = difference + ''.join(unifiedDiff)
         for root, subFolders, files in os.walk(dir1):
@@ -74,10 +72,8 @@ def diff(id1=None,id2=None):
                 if os.path.join(os.path.relpath(root, dir1), f) not in filesDone:
                     filePath1 = os.path.join(root, f)
                     filePath2 = os.path.join(dir2, os.path.relpath(root, dir2), f)
-                    file1 = open(filePath1, 'r')
-                    f1 = file1.readlines()
-                    f2 = ''
-                    file1.close()
+                    f1 = readFile(filePath1)
+                    f2 = readFile(filePath2)
                     unifiedDiff = difflib.unified_diff(f1, f2, fromfile=filePath1, tofile=filePath2)
                     difference = difference + ''.join(unifiedDiff)
 

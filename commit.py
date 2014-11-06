@@ -49,7 +49,7 @@ def snap(snapType, message):
         raise Exception("Commit type can only be hard or soft")
 
     #calculate commit ID which is hash of the diff
-    snapId = md5(diff).hexdigest() + str(randint(0,100000))
+    snapId = md5(diff).hexdigest()
 
     head = globals.REPOINFO['HEAD']
     latestId = globals.REPOINFO['latestId']
