@@ -34,9 +34,8 @@ def init():
         if os.path.exists(os.path.join(globals.ROOT, '.gaea')):
             p = Popen(['rm', '-rf', os.path.join(globals.ROOT, '.gaea')])
             p.wait()
-        os.makedirs(os.path.join(globals.ROOT, '.gaea'))
-        if not os.path.exists(os.path.join(globals.ROOT, '.gaea', 'snaps')):
-            os.makedirs(os.path.join(globals.ROOT, '.gaea', 'snaps'))
+        os.makedirs(os.path.join(globals.ROOT, '.gaea', 'snaps'))
+        os.makedirs(os.path.join(globals.ROOT, '.gaea', 'peers'))
         dataMap = {'HEAD':'0', 'latestId':'0', 'author': '', 'email': '', 'remote':{} }
         helpers.dump(dataMap)
         initPeerDirec()
@@ -66,7 +65,7 @@ def initPeerDirec(clonedPeers=None):
     p3 = Popen(['sudo','chgrp', '-R',  'gaea', globals.ROOT], stdout=PIPE)
     p3.wait()
     #p3.communicate(rootPassword+'\n')
-    p4 = Popen(['sudo','chmod', '-R', 'g+r', globals.ROOT], stdout=PIPE)
+    p4 = Popen(['sudo','chmod', '-R', 'g+rw', globals.ROOT], stdout=PIPE)
     p4.wait()
     #p4.communicate(rootPassword+'\n')
     helpers.dumpPeerDirec(peerMap)

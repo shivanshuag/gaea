@@ -7,6 +7,7 @@ from bzrlib.merge3 import Merge3
 import os
 import globals
 import commit
+import repo
 import helpers
 import shutil
 import yaml
@@ -40,7 +41,7 @@ def findCommonAncestor(remoteInfo, localInfo):
 def clone(ip, path, username, password):
     #address = address.split(':')
     #password = getpass.getpass('Password:')
-    address = ip+':'+path
+    #address = ip+':'+path
     ssh = SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     ssh.load_system_host_keys()
@@ -49,23 +50,26 @@ def clone(ip, path, username, password):
     #ssh.connect(addSplit[1], username=addSplit[0], password=password)
     #else:
     #    ssh.connect(addSplit[0])
-    ssh.connect(address, username=username, password=password)
+    ssh.connect(ip, username=username, password=password)
     scp = SCPClient(ssh.get_transport())
-    scp.get(address[1], recursive=True)
+    scp.get(path, recursive=True)
     #after cloning, change the peerinfo file of the user
     globals.ROOT = os.path.join(globals.ROOT,os.path.basename(os.path.normpath(path)))
     f = open(os.path.join(globals.ROOT, '.gaea', 'peers', 'peers.yml'))
     clonedPeers = yaml.safe_load(f)
     f.close()
+    print clonedPeers
     clonedPeers['peers'].update(helpers.mergePeers())
-    myMap = initPeerDirec(clonedPeers)
+    myMap = repo.initPeerDirec(clonedPeers)
+    print myMap
     #push my peerrinfo the remote user
     f = open(myMap['ip'], 'w')
-    myPeerInfo = {myMap['ip']:{'username':myMap['username'], 'password':myMap['password'], 'path':myMap['password']}}
+    os.chmod(myMap['ip'], 0666)
+    myPeerInfo = {myMap['ip']:{'username':myMap['username'], 'password':myMap['password'], 'path':myMap['path']}}
     yaml.dump(myPeerInfo, f, default_flow_style=False)
     f.close()
-    scp.put(myMap['ip'], ip+':'+os.path.join(path, '.gaea', 'peers'))
-    os.remove(myMap['ip'])
+    scp.put(myMap['ip'], os.path.join(path, '.gaea', 'peers'))
+    #os.remove(myMap['ip'])
     ssh.close()
 
 

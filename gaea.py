@@ -123,12 +123,10 @@ elif len(args.all) >= 4:
             except Exception, e:
                 print e
     elif args.all[0] == 'clone':
-        try:
+        #try:
             remote.clone(args.all[1], args.all[2], args.all[3], args.all[4])
-        except Exception,e:
-            print e
-        else:
-            puts(colored.red("Incorrect Usage"))
+        #except Exception,e:
+        #    print e
     else:
         puts(colored.red("Incorrect Usage"))
 
