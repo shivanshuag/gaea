@@ -7,35 +7,22 @@ from bzrlib.merge3 import Merge3
 import os
 import globals
 import commit
-import repo
+import helpers
 import shutil
 import yaml
 
-def findLength(repoInfo):
-    node = repoInfo[repoInfo['HEAD']]
-    length = 1
-    while node['parent'] != '0':
-        node = repoInfo[node['parent']]
-        length+=1
-    return length
-
-def goToN(repoInfo, n):
-    output = repoInfo['HEAD']
-    for i in range(0,n):
-        output = repoInfo[output]['parent']
-    return output
 
 def findCommonAncestor(remoteInfo, localInfo):
-    lenRemote = findLength(remoteInfo)
-    lenLocal = findLength(globals.REPOINFO)
+    lenRemote = helpers.findLength(remoteInfo)
+    lenLocal = helpers.findLength(globals.REPOINFO)
     #print "remote lenght is"+str(lenRemote)
     #print "local length is"+str(lenLocal)
     if lenLocal > lenRemote:
         startRemote = remoteInfo['HEAD']
-        startLocal = goToN(localInfo, lenLocal-lenRemote)
+        startLocal = helpers.goToN(localInfo, lenLocal-lenRemote)
     elif lenRemote > lenLocal:
         startLocal = localInfo['HEAD']
-        startRemote = goToN(remoteInfo, lenRemote-lenLocal)
+        startRemote = helpers.goToN(remoteInfo, lenRemote-lenLocal)
     else:
         startLocal = localInfo['HEAD']
         startRemote = remoteInfo['HEAD']
@@ -50,22 +37,49 @@ def findCommonAncestor(remoteInfo, localInfo):
         startLocal = localInfo[startLocal]['parent']
         startRemote = remoteInfo[startRemote]['parent']
 
-def clone(address):
-    address = address.split(':')
-    password = getpass.getpass('Password:')
+def clone(ip, path, username, password):
+    #address = address.split(':')
+    #password = getpass.getpass('Password:')
+    address = ip+':'+path
     ssh = SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     ssh.load_system_host_keys()
-    addSplit = address[0].split('@')
-    if(len(addSplit) == 2):
-        ssh.connect(addSplit[1], username=addSplit[0], password=password)
-    else:
-        ssh.connect(addSplit[0])
-
+    #addSplit = address[0].split('@')
+    #if(len(addSplit) == 2):
+    #ssh.connect(addSplit[1], username=addSplit[0], password=password)
+    #else:
+    #    ssh.connect(addSplit[0])
+    ssh.connect(address, username=username, password=password)
     scp = SCPClient(ssh.get_transport())
     scp.get(address[1], recursive=True)
+    #after cloning, change the peerinfo file of the user
+    globals.ROOT = os.path.join(globals.ROOT,os.path.basename(os.path.normpath(path)))
+    f = open(os.path.join(globals.ROOT, '.gaea', 'peers', 'peers.yml'))
+    clonedPeers = yaml.safe_load(f)
+    f.close()
+    clonedPeers['peers'].update(helpers.mergePeers())
+    myMap = initPeerDirec(clonedPeers)
+    #push my peerrinfo the remote user
+    f = open(myMap['ip'], 'w')
+    myPeerInfo = {myMap['ip']:{'username':myMap['username'], 'password':myMap['password'], 'path':myMap['password']}}
+    yaml.dump(myPeerInfo, f, default_flow_style=False)
+    f.close()
+    scp.put(myMap['ip'], ip+':'+os.path.join(path, '.gaea', 'peers'))
+    os.remove(myMap['ip'])
+    ssh.close()
 
-def pull(address):
+
+
+def pullAll():
+    peerInfo = globals.PEERINFO['peers']
+    for ip in peerInfo.keys():
+        try:
+            pull(ip, peerInfo[ip]['path'], peerInfo[ip]['username'], peerInfo['password'])
+        except Exception,e:
+            print e
+    pass
+
+def pull(ip, path, username, password):
     if(commit.diff()):
         raise Exception('You have unsaved changes. Take their snapshot before pulling otherwise you may loose them.')
     pullPath = os.path.join(globals.ROOT, '.gaea', 'pull', address.encode("hex"))
@@ -73,13 +87,21 @@ def pull(address):
         os.makedirs(pullPath)
     os.chdir(pullPath)
     #TODO add print to give feedback to the user about what is being done
-    clone(address)
-    merge(pullPath, address)
+    clone(ip, path, username, password)
+    os.chdir(globals.ROOT)
+    conflictCount = merge(pullPath, address)
+    if conflictCount > 0:
+        print "Total "+str(conflictCount)+" in merge\nFix them and take a snapshot before running pull again"
+    else:
+        if repo.diff():
+            commit.snap('hard', "Merged HEAD from "+ address)
+    shutil.rmtree(pullPath)
 
 def mergeLines(filePathBase, filePathNew, filePathLatest, copyPath, f, new=False):
-    baseLines = repo.readFile(filePathBase)
-    newLines = repo.readFile(filePathNew)
-    latestLines = repo.readFile(filePathLatest)
+    conflict = False
+    baseLines = helpers.readFile(filePathBase)
+    newLines = helpers.readFile(filePathNew)
+    latestLines = helpers.readFile(filePathLatest)
 
     mg = Merge3(baseLines, newLines, latestLines)
     merg = mg.merge_lines(name_a=filePathNew,name_b=filePathLatest,name_base=filePathBase, reprocess=True)
@@ -88,6 +110,7 @@ def mergeLines(filePathBase, filePathNew, filePathLatest, copyPath, f, new=False
     if merged:
         if '<<<<<<<' in merged:
             print 'Merge conflict in file '+ os.path.join(copyPath,f)
+            conflict = True
         else:
             print 'Merged without conflict '+ os.path.join(copyPath,f)
         if not os.path.exists(copyPath):
@@ -97,9 +120,11 @@ def mergeLines(filePathBase, filePathNew, filePathLatest, copyPath, f, new=False
         f.close()
     elif new:
         print 'Deleting file after merge '+ os.path.join(copyPath,f)
+    return conflict
 
 
 def merge(pullPath, address):
+    conflictCount = 0
     remoteYaml = os.path.join(pullPath, os.listdir(pullPath)[0], '.gaea', 'gaea.yml');
     if os.path.exists(remoteYaml):
         f = open(remoteYaml)
@@ -119,8 +144,8 @@ def merge(pullPath, address):
     latestPath = os.path.join(pullPath, os.listdir(pullPath)[0], '.gaea', 'snaps', remoteInfo['HEAD'])
 
     #delete all the current files in the repo
-    files = commit.getFiles(globals.ROOT)
-    dirs = commit.getDirs(globals.ROOT)
+    files = helpers.getFiles(globals.ROOT)
+    dirs = helpers.getDirs(globals.ROOT)
     for directory in dirs:
         shutil.rmtree(os.path.join(globals.ROOT,directory))
     for f in files:
@@ -137,7 +162,8 @@ def merge(pullPath, address):
             filePathBase = os.path.join(root, f)
             filePathNew = os.path.join(newPath, os.path.relpath(root, basePath), f)
             filePathLatest = os.path.join(latestPath, os.path.relpath(root, basePath), f)
-            mergeLines(filePathBase, filePathNew, filePathLatest, copyPath, f)
+            if mergeLines(filePathBase, filePathNew, filePathLatest, copyPath, f):
+                conflictCount += 1
 
     #merge files only in new
     for root, subFolders, files in os.walk(newPath):
@@ -152,7 +178,8 @@ def merge(pullPath, address):
                 filePathBase = os.path.join(basePath, os.path.relpath(root, newPath), f)
                 filePathNew = os.path.join(root, f)
                 filePathLatest = os.path.join(latestPath, os.path.relpath(root, newPath), f)
-                mergeLines(filePathBase, filePathNew, filePathLatest, copyPath, f, new=True)
+                if mergeLines(filePathBase, filePathNew, filePathLatest, copyPath, f, new=True):
+                    conflictCount += 1
 
     #merge files only in latest
     for root, subFolders, files in os.walk(latestPath):
@@ -167,4 +194,6 @@ def merge(pullPath, address):
                 filePathBase = os.path.join(basePath, os.path.relpath(root, newPath), f)
                 filePathNew = os.path.join(newPath, os.path.relpath(root,newPath), f)
                 filePathLatest = os.path.join(root, f)
-                mergeLines(filePathBase, filePathNew, filePathLatest, copyPath, f)
+                if mergeLines(filePathBase, filePathNew, filePathLatest, copyPath, f):
+                    conflictCount += 1
+    return conflictCount

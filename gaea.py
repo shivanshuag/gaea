@@ -67,11 +67,6 @@ elif len(args.all) == 2:
                     puts(colored.white(line, False, True))
         except Exception,e:
             print e
-    elif args.all[0] == 'clone':
-        try:
-            remote.clone(args.all[1])
-        except Exception,e:
-            print e
     elif args.all[0] == 'pull':
         try:
             repo.LoadRepo()
@@ -119,7 +114,7 @@ elif len(args.all) == 3:
             repo.setEmail(args.all[2])
         except Exception, e:
             print e
-elif len(args.all) == 4:
+elif len(args.all) >= 4:
     if args.all[0] == 'set':
         if args.all[1] == 'remote':
             try:
@@ -127,6 +122,11 @@ elif len(args.all) == 4:
                 repo.setRemote(args.all[2], args.all[3])
             except Exception, e:
                 print e
+    elif args.all[0] == 'clone':
+        try:
+            remote.clone(args.all[1], args.all[2], args.all[3], args.all[4])
+        except Exception,e:
+            print e
         else:
             puts(colored.red("Incorrect Usage"))
     else:

@@ -2,40 +2,10 @@ import globals
 import os
 import shutil
 import repo
+import helpers
 from datetime import datetime
 from hashlib import md5
 from random import randint
-
-
-
-#lists all the files inside a folder
-def getFiles(root):
-    return [f for f in os.listdir(root) if os.path.isfile(os.path.join(root,f))]
-
-#lists all the directories inside a folder excpet '.gaea' directory
-def getDirs(root):
-    return [f for f in os.listdir(root) if os.path.isdir(os.path.join(root,f)) and f!='.gaea']
-
-#find the full id of the snapshot by matching substring of all the keys
-def getFullSnapId(snapId):
-    if len(snapId) < 6:
-        raise Exception("Provide at least 6 characters of id")
-    found = False
-    keys = globals.REPOINFO.keys()
-    keys.remove("HEAD")
-    keys.remove("latestId")
-    keys.remove("author")
-    keys.remove("email")
-    keys.remove("remote")
-    for key in keys:
-        if snapId in key:
-            snapId = key
-            found = True
-            break
-    if not found:
-        raise Exception("There is no snapshot by the id "+snapId)
-    return snapId
-
 
 def snap(snapType, message):
 
@@ -69,17 +39,18 @@ def snap(snapType, message):
     snapDir = os.path.join(globals.ROOT,'.gaea','snaps',snapId)
     if not os.path.exists(snapDir):
         os.makedirs(snapDir)
-    files = getFiles(globals.ROOT)
-    dirs = getDirs(globals.ROOT)
+    files = helpers.getFiles(globals.ROOT)
+    dirs = helpers.getDirs(globals.ROOT)
     for directory in dirs:
         shutil.copytree(os.path.join(globals.ROOT, directory), os.path.join(snapDir,directory))
     for f in files:
         shutil.copy2(os.path.join(globals.ROOT,f), os.path.join(snapDir, f))
 
-    repo.dump(globals.REPOINFO)
+    helpers.dump(globals.REPOINFO)
+
 
 def restore(snapId):
-    snapId = getFullSnapId(snapId)
+    snapId = helpers.getFullSnapId(snapId)
     #give error if there are some unsaved changes present
     if repo.diff():
         raise Exception('''You have some unsaved changes in the repository.
@@ -89,25 +60,25 @@ def restore(snapId):
     snapDir = os.path.join(globals.ROOT, '.gaea', 'snaps', snapId)
 
     #delete all files/folders from ROOT
-    files = getFiles(globals.ROOT)
-    dirs = getDirs(globals.ROOT)
+    files = helpers.getFiles(globals.ROOT)
+    dirs = helpers.getDirs(globals.ROOT)
     for directory in dirs:
         shutil.rmtree(os.path.join(globals.ROOT,directory))
     for f in files:
         os.remove(os.path.join(globals.ROOT, f))
 
     #copy the files back from snapshot directory to the ROOT directory
-    files = getFiles(snapDir)
-    dirs = getDirs(snapDir)
+    files = helpers.getFiles(snapDir)
+    dirs = helpers.getDirs(snapDir)
     for directory in dirs:
         shutil.copytree(os.path.join(snapDir, directory), os.path.join(globals.ROOT, directory))
     for f in files:
         shutil.copy2(os.path.join(snapDir,f), os.path.join(globals.ROOT, f))
-    repo.dump(globals.REPOINFO)
+    helpers.dump(globals.REPOINFO)
 
 
 def delete(snapId):
-    snapId = getFullSnapId(snapId)
+    snapId = helpers.getFullSnapId(snapId)
 
     head = globals.REPOINFO['HEAD']
     latest = globals.REPOINFO['latestId']
@@ -123,4 +94,4 @@ def delete(snapId):
     del globals.REPOINFO[snapId]
     snapDir = os.path.join(globals.ROOT, '.gaea', 'snaps', snapId)
     shutil.rmtree(snapDir)
-    repo.dump(globals.REPOINFO)
+    helpers.dump(globals.REPOINFO)
