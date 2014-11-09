@@ -35,6 +35,39 @@ class InitPromptWindow(QtGui.QMainWindow):
         RootPassword = self.editRootPassword.text()
         print "password is ", RootPassword
 
+class CommitPromptWindow(QtGui.QMainWindow):
+    t = 0
+    def __init__(self):
+        QtGui.QMainWindow.__init__(self)
+        uic.loadUi('commitui.ui',self)
+        self.setWindowTitle("Commit Prompt")
+        self.resize(350,200)
+        self.move(500, 500)
+        self.but.clicked.connect(self.commit)
+        self.radioSoft.setChecked(True)
+        self.radioHard.setChecked(False)
+    #    self.radioSoft.toggled.connect(self.softClick)
+        self.radioHard.toggled.connect(self.hardClick)
+    
+    def commit(self):
+        print "button clicked"
+        message = self.editMessage.text()
+        print "msg is ", message, " toggle is ", self.t
+
+    def softClick(self):
+        self.t = 1 - self.t
+        print "toggle ", t
+        # self.radioSoft.setChecked(True)
+        # self.radioHard.setChecked(False)
+
+    def hardClick(self):
+        self.t = 1 - self.t
+        print "toggle ", self.t
+        # self.radioSoft.setChecked(False)
+        # self.radioHard.setChecked(True)
+
+
+
 class CloneWindow(QtGui.QMainWindow):
     def __init__(self):
         QtGui.QMainWindow.__init__(self)
@@ -294,15 +327,25 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
     def snap(self):
         print "commit button pressed"
         # here put a check for changes... if no change has been made then don't allow commit
-        text, ok = QtGui.QInputDialog.getText(self, 'Input Dialog', 'Enter your name:')
-        if ok:
-            print "message is ", str(text)
-            try:
-                repo.LoadRepo()
-                commit.snap(str(text))
-                print "commit successfull"
-            except Exception, e:
-                print e
+        # text, ok = QtGui.QInputDialog.getText(self, 'Input Dialog', 'Enter your name:')
+        # if ok:
+        #     print "message is ", str(text)
+        #     try:
+        #         repo.LoadRepo()
+        #         commit.snap(str(text))
+        #         print "commit successfull"
+        #     except Exception, e:
+        #         print e
+        try:
+            self.myOtherWindow = CommitPromptWindow()
+            self.myOtherWindow.show()
+
+        #    repo.init()
+            print "commit function called"
+
+        except Exception, e:
+            print e
+
 
 
     def pull(self):
