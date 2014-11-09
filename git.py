@@ -105,6 +105,7 @@ class PeerWindow(QtGui.QMainWindow):
             check = QtCore.Qt.Unchecked
             item.setCheckState(check)
             item.setCheckable(True)
+            item.setEditable(False)
             model.appendRow(item)
         self.list_peers.setModel(model)
         self.list_peers.clicked.connect(self.listClicked1)
@@ -117,11 +118,13 @@ class PeerWindow(QtGui.QMainWindow):
         
         if index.row() in self.PeerSelected:
             self.PeerSelected.remove(index.row())
+            index.model().item(index.row()).setCheckState(QtCore.Qt.Unchecked)
             print "removed "
             print self.PeerSelected
 
         elif index.row() not in self.PeerSelected:
             self.PeerSelected.append(index.row())
+            index.model().item(index.row()).setCheckState(QtCore.Qt.Checked)
             print "appended "
             print self.PeerSelected
 
@@ -206,6 +209,7 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
             check = QtCore.Qt.Unchecked
             item.setCheckState(check)
             item.setCheckable(True)
+            item.setEditable(False)
             model.appendRow(item)
 
 
@@ -230,13 +234,19 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
         print 'called ' 
         print index.row() 
         print index.data().toString()
-        
+        #index.setCheckState(True)
+
+#        print self.list_commit.item(index.row())
+        #print index.child(0, 0)
         if index.row() in self.diffList:
             self.diffList.remove(index.row())
             print "removed "
             print self.diffList
+            index.model().item(index.row()).setCheckState(QtCore.Qt.Unchecked)
+
         elif index.row() not in self.diffList:
             self.diffList.append(index.row())
+            index.model().item(index.row()).setCheckState(QtCore.Qt.Checked)
             print "appended "
             print self.diffList
         # itms = self.assetList.selectedIndexes()
