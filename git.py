@@ -1,5 +1,6 @@
 import sys
 from PyQt4 import QtCore, QtGui, uic
+from random import *
 
 #import gaea
 import globals
@@ -11,24 +12,115 @@ from clint.arguments import Args
 from clint.textui import puts, colored, indent
 
 form_class = uic.loadUiType("git.ui")[0]                 # Load the UI
+
+class InitPromptWindow(QtGui.QMainWindow):
+    def __init__(self):
+        QtGui.QMainWindow.__init__(self)
+        uic.loadUi('initui.ui',self)
+        self.setWindowTitle("Init Prompt")
+        self.resize(350,400)
+        self.move(500, 500)
+        self.but.clicked.connect(self.init)
+        self.editPassword.setEchoMode(QtGui.QLineEdit.Password)
+        self.editRootPassword.setEchoMode(QtGui.QLineEdit.Password)
+
+    def init(self):
+        print "button clicked"
+        name = self.editName.text()
+        print "name is ", name
+
+        Password = self.editPassword.text()
+        print "password is ", Password
+
+        RootPassword = self.editRootPassword.text()
+        print "password is ", RootPassword
+
 class CloneWindow(QtGui.QMainWindow):
     def __init__(self):
         QtGui.QMainWindow.__init__(self)
         uic.loadUi('prompt.ui',self)
-        self.setWindowTitle("Win2")
+        self.setWindowTitle("Clone")
+        self.resize(350,400)
+        self.move(500, 500)
         self.but.clicked.connect(self.clone)
+        self.editPassword.setEchoMode(QtGui.QLineEdit.Password)
 
     def clone(self):
         print "button clicked"
         IP = self.editIP.text()
         print "ip is ", IP
+        Path = self.editPath.text()
+        print "path is ", Path
+        Password = self.editPassword.text()
+        print "password is ", Password
 
 class PeerWindow(QtGui.QMainWindow):
+    PeerSelected = []
+    def __init__(self):
+        QtGui.QMainWindow.__init__(self)
+        uic.loadUi('peers.ui',self)
+        self.setWindowTitle("Peer Details")
+        self.resize(350,600)
+        self.move(500, 500)
+        self.but_add.clicked.connect(self.add)
+        self.but_delete.clicked.connect(self.delete)
+        self.but_delete.setEnabled(False)
+
+        model = QtGui.QStandardItemModel()
+        for i in range(10):
+            item = QtGui.QStandardItem('Item %s' % randint(1, 100))
+            check = QtCore.Qt.Unchecked
+            item.setCheckState(check)
+            item.setCheckable(True)
+            model.appendRow(item)
+        self.list_peers.setModel(model)
+        self.list_peers.clicked.connect(self.listClicked1)
+
+    @QtCore.pyqtSlot(QtCore.QModelIndex)
+    def listClicked1(self, index):
+        print 'called ' 
+        print index.row() 
+        print index.data().toString()
+        
+        if index.row() in self.PeerSelected:
+            self.PeerSelected.remove(index.row())
+            print "removed "
+            print self.PeerSelected
+
+        elif index.row() not in self.PeerSelected:
+            self.PeerSelected.append(index.row())
+            print "appended "
+            print self.PeerSelected
+
+        if(len(self.PeerSelected) == 0):
+            self.but_delete.setEnabled(False)
+        else:
+            self.but_delete.setEnabled(True)
+
+
+    def add(self):
+        print "add button clicked"
+        self.myOtherWindow = AddPeerWindow()
+        self.myOtherWindow.show()
+
+    def delete(self):
+        print "del button clicked"
+        del_msg = "Are you sure you want to delete " + str(self.PeerSelected)[1:-1]
+        reply = QtGui.QMessageBox.question(self, 'Message', del_msg, QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
+        if reply == QtGui.QMessageBox.Yes:
+            print "delete", self.PeerSelected
+
+
+class AddPeerWindow(QtGui.QMainWindow):
     def __init__(self):
         QtGui.QMainWindow.__init__(self)
         uic.loadUi('prompt.ui',self)
-        self.setWindowTitle("Win3")
+        self.setWindowTitle("Add Peer")
+        self.resize(350,400)
+        self.move(500, 500)
         self.but.clicked.connect(self.addPeer)
+        self.editPassword.setEchoMode(QtGui.QLineEdit.Password)
+
 
     def addPeer(self):
         print "button clicked"
@@ -36,16 +128,20 @@ class PeerWindow(QtGui.QMainWindow):
         print "ip is ", IP
         Path = self.editPath.text()
         print "path is ", Path
+        Password = self.editPassword.text()
+        print "password is ", Password
 
 
 
 class MyWindowClass(QtGui.QMainWindow, form_class):
+    diffList = []
     def __init__(self, parent=None):
         QtGui.QMainWindow.__init__(self, parent)
         self.setupUi(self)
         self.but_openFile.clicked.connect(self.openFile)
         self.but_name.clicked.connect(self.setName)
         self.but_email.clicked.connect(self.setEmail)
+        self.but_diff.clicked.connect(self.diff)
     #    self.but_remote.clicked.connect(self.setRemote)
 
     #    self.but_push.clicked.connect(self.push)
@@ -57,17 +153,34 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
         self.but_restore.clicked.connect(self.restore)
         self.but_clone.clicked.connect(self.clone)
         self.but_addPeer.clicked.connect(self.addPeer)
-        qtable_history = self.table_history
-        qtable_history.setColumnCount(4)
-        listOfLables = ['Commit Id','Message', 'Author', 'Time']
+        self.but_delete.clicked.connect(self.delete)
+        self.diffList = []
+        # qtable_history = self.table_history
+        # qtable_history.setColumnCount(4)
+        # listOfLables = ['Commit Id','Message', 'Author', 'Time']
 
-        header = qtable_history.horizontalHeader()
-        header.setResizeMode(QtGui.QHeaderView.Stretch)
+        # header = qtable_history.horizontalHeader()
+        # header.setResizeMode(QtGui.QHeaderView.Stretch)
                 
-        qtable_history.setHorizontalHeaderLabels(listOfLables)
-        self.populateTable(qtable_history)
+        # qtable_history.setHorizontalHeaderLabels(listOfLables)
+        # self.populateTable(qtable_history)
 
-        self.displayDiff()
+        # self.displayDiff()
+
+        model = QtGui.QStandardItemModel()
+        for i in range(10):
+            item = QtGui.QStandardItem('Item %s' % randint(1, 100))
+            check = QtCore.Qt.Unchecked
+            item.setCheckState(check)
+            item.setCheckable(True)
+            model.appendRow(item)
+
+
+#        model.setStringList(QtCore.QString("Item 1;Item 2;Item 3;Item 4").split(";"))    
+        self.list_commit.setModel(model)
+        self.list_commit.clicked.connect(self.listClicked)
+
+    #    QtCore.QObject.connect(self.list_commit,QtCore.SIGNAL("clicked(QModelIndex)"), self.list_commit, QtCore.SLOT("ItemClicked(QModelIndex)"))
 
         self.actionNew_Project.setShortcut('Ctrl+N')
         self.actionNew_Project.triggered.connect(self.newProject)
@@ -77,7 +190,30 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
 
         self.actionExit.setShortcut('Alt+F4')
         self.actionExit.triggered.connect(self.exit)
-#        print "cwd is " + globals.ROOT
+        #print "cwd is " + globals.ROOT
+    
+    @QtCore.pyqtSlot(QtCore.QModelIndex)
+    def listClicked(self, index):
+        print 'called ' 
+        print index.row() 
+        print index.data().toString()
+        
+        if index.row() in self.diffList:
+            self.diffList.remove(index.row())
+            print "removed "
+            print self.diffList
+        elif index.row() not in self.diffList:
+            self.diffList.append(index.row())
+            print "appended "
+            print self.diffList
+        # itms = self.assetList.selectedIndexes()
+        # for it in itms:
+        #     print 'selected item index found at %s' % it.row()
+
+
+    # @pyqtSlot("QModelIndex")
+    # def ItemClicked(self,index):
+    #     QMessageBox.information(None,"Hello!","You Clicked: \n"+index.data().toString())
 
     def openFile(self):
 #    	fname = QtGui.QFileDialog.getOpenFileName(self, 'Open file', '/home')
@@ -130,7 +266,22 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
     #         except Exception, e:
     #             print e
 
-    
+    def diff(self):
+        print "diff called"
+        print "diff list is ", self.diffList
+        if(len(self.diffList) == 1):
+            print "diff of current state and ", self.diffList[0]
+        elif(len(self.diffList) == 2):
+            print "diff between ", self.diffList[0], " and ", self.diffList[1]
+        elif(len(self.diffList) == 0):
+            print "diff from last commit"
+        else:
+            print "error"
+            msgBox = QtGui.QMessageBox() 
+            msgBox.setWindowTitle("Error!")
+            msgBox.setText("You have selected more than two commits for diff.")
+            msgBox.exec_()
+
     def populateTable(self, qtable):
         array = [["mohit", "kumar", "garg", "cse"], ["gaurav", "gautam", "-", "phy"]]
         print "populateTable called"
@@ -157,6 +308,8 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
     def pull(self):
         print "pull button pressed"
 
+    def delete(self):
+        print "delete button pressed"
 
     def pullAll(self):
         print "pull all button pressed"
@@ -178,8 +331,12 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
 
     def init(self):
         try:
-            repo.init()
+            self.myOtherWindow = InitPromptWindow()
+            self.myOtherWindow.show()
+
+        #    repo.init()
             print "init function called"
+
         except Exception, e:
             print e
         
@@ -212,6 +369,31 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
                 commit.restore(str(text))
             except Exception,e:
                 print e
+
+    def enableButtons(self):
+        self.but_name.setEnabled(True)
+        self.but_email.setEnabled(True)
+        self.but_pullAll.setEnabled(True)
+        self.but_pull.setEnabled(True)
+        self.but_commit.setEnabled(True)
+        self.but_delete.setEnabled(True)
+        self.but_clone.setEnabled(True)
+        self.but_addPeer.setEnabled(True)
+        self.but_restore.setEnabled(True)
+
+
+
+    def disableButtons(self):
+        self.but_name.setEnabled(False)
+        self.but_email.setEnabled(False)
+        self.but_pullAll.setEnabled(False)
+        self.but_pull.setEnabled(False)
+        self.but_commit.setEnabled(False)
+        self.but_delete.setEnabled(False)
+        self.but_clone.setEnabled(False)
+        self.but_addPeer.setEnabled(False)
+        self.but_restore.setEnabled(False)
+
 
 app = QtGui.QApplication(sys.argv)
 myWindow = MyWindowClass(None)

@@ -5,6 +5,7 @@ def init():
     global REPOINFO
     global PEERINFO
     ROOT = os.getcwd()
+    
 
 def changeCWD(strng):
 	global ROOT

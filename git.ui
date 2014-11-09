@@ -63,16 +63,6 @@
      <string>Set Email</string>
     </property>
    </widget>
-   <widget class="QTableWidget" name="table_history">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>30</y>
-      <width>501</width>
-      <height>192</height>
-     </rect>
-    </property>
-   </widget>
    <widget class="QLabel" name="label">
     <property name="geometry">
      <rect>
@@ -192,12 +182,48 @@
      <rect>
       <x>440</x>
       <y>440</y>
+      <width>111</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Manage Peers</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="but_delete">
+    <property name="geometry">
+     <rect>
+      <x>430</x>
+      <y>230</y>
       <width>98</width>
       <height>27</height>
      </rect>
     </property>
     <property name="text">
-     <string>Add Peer</string>
+     <string>Delete</string>
+    </property>
+   </widget>
+   <widget class="QListView" name="list_commit">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>40</y>
+      <width>481</width>
+      <height>171</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="but_diff">
+    <property name="geometry">
+     <rect>
+      <x>560</x>
+      <y>10</y>
+      <width>98</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>diff</string>
     </property>
    </widget>
   </widget>
