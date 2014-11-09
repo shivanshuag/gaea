@@ -38,7 +38,7 @@ def findCommonAncestor(remoteInfo, localInfo):
         startLocal = localInfo[startLocal]['parent']
         startRemote = remoteInfo[startRemote]['parent']
 
-def clone(ip, path, username, password):
+def clone(ip, path, username, password,pull=False):
     #address = address.split(':')
     #password = getpass.getpass('Password:')
     #address = ip+':'+path
@@ -60,27 +60,40 @@ def clone(ip, path, username, password):
     f.close()
     print clonedPeers
     clonedPeers['peers'].update(helpers.mergePeers())
-    myMap = repo.initPeerDirec(clonedPeers)
-    print myMap
-    #push my peerrinfo the remote user
-    f = open(myMap['ip'], 'w')
-    os.chmod(myMap['ip'], 0666)
-    myPeerInfo = {myMap['ip']:{'username':myMap['username'], 'password':myMap['password'], 'path':myMap['path']}}
-    yaml.dump(myPeerInfo, f, default_flow_style=False)
-    f.close()
-    scp.put(myMap['ip'], os.path.join(path, '.gaea', 'peers'))
-    #os.remove(myMap['ip'])
+    if not pull:
+        myMap = repo.initPeerDirec(clonedPeers)
+        print myMap
+        #push my peerrinfo the remote user
+        f = open(myMap['ip'], 'w')
+        os.chmod(myMap['ip'], 0666)
+        myPeerInfo = {myMap['ip']:{'username':myMap['username'], 'password':myMap['password'], 'path':myMap['path']}}
+        yaml.dump(myPeerInfo, f, default_flow_style=False)
+        f.close()
+        scp.put(myMap['ip'], os.path.join(path, '.gaea', 'peers'))
+        #os.remove(myMap['ip'])
+    else:
+        globals.PEERINFO['peers'].update(clonedPeers['peers'])
     ssh.close()
 
 
 
 def pullAll():
     peerInfo = globals.PEERINFO['peers']
-    for ip in peerInfo.keys():
+    abort = False
+    for index,ip in enumerate(peerInfo.keys()):
+        if 'pull' in globals.REPOINFO.keys():
+            if index <= globals.REPOINFO['pull']:
+                continue
         try:
+            globals.REPOINFO['pull'] = index
+            helpers.dump(globals.REPOINFO)
             pull(ip, peerInfo[ip]['path'], peerInfo[ip]['username'], peerInfo['password'])
         except Exception,e:
             print e
+            abort = True;
+            break;
+    if not abort:
+        del globals.PEERINFO['pull']
     pass
 
 def pull(ip, path, username, password):
@@ -91,11 +104,19 @@ def pull(ip, path, username, password):
         os.makedirs(pullPath)
     os.chdir(pullPath)
     #TODO add print to give feedback to the user about what is being done
-    clone(ip, path, username, password)
+    print 'Pulling '+username+'@'+ip+':'+path
+    #change the ROOT for clone to work
+    perviousRoot = globals.ROOT
+    globals.ROOT = pullPath
+    clone(ip, path, username, password, True)
+    globals.ROOT = previousRoot
     os.chdir(globals.ROOT)
+    #dump the updated peerinfo back to repo
+    helpers.dump(globals.PEERINFO)
     conflictCount = merge(pullPath, address)
     if conflictCount > 0:
-        print "Total "+str(conflictCount)+" in merge\nFix them and take a snapshot before running pull again"
+        print "Total "+str(conflictCount)+" conflicts in merge\nFix them and take a snapshot before running pull again"
+        raise Exception("Merge Conflict in "+username+'@'+ip+':'+path)
     else:
         if repo.diff():
             commit.snap('hard', "Merged HEAD from "+ address)

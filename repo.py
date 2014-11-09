@@ -120,7 +120,7 @@ def log():
     parent = globals.REPOINFO['latestId']
     log = ''
     while parent in globals.REPOINFO.keys():
-        log = log + str(parent) + ':\n\tMessage - ' + globals.REPOINFO[parent]['message'] + '\n\tAuthor - '+globals.REPOINFO[parent]['author']+'\n\tTime-'+globals.REPOINFO[parent]['time']+'\n\n'
+        log = log + parent + ':\n\tMessage - ' + globals.REPOINFO[parent]['message'] + '\n\tAuthor - '+globals.REPOINFO[parent]['author']+'\n\tTime-'+globals.REPOINFO[parent]['time']+'\n\n'
         parent = globals.REPOINFO[parent]['parent']
     return log
 
