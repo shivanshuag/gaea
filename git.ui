@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
+    <width>708</width>
     <height>600</height>
    </rect>
   </property>
@@ -112,24 +112,11 @@
      <string>commit</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="but_push">
-    <property name="geometry">
-     <rect>
-      <x>560</x>
-      <y>90</y>
-      <width>98</width>
-      <height>27</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Push</string>
-    </property>
-   </widget>
    <widget class="QPushButton" name="but_pull">
     <property name="geometry">
      <rect>
       <x>560</x>
-      <y>130</y>
+      <y>90</y>
       <width>98</width>
       <height>27</height>
      </rect>
@@ -161,7 +148,7 @@
      <string>Init</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="but_log">
+   <widget class="QPushButton" name="but_restore">
     <property name="geometry">
      <rect>
       <x>560</x>
@@ -171,10 +158,23 @@
      </rect>
     </property>
     <property name="text">
-     <string>Log</string>
+     <string>Restore</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="but_restore">
+   <widget class="QPushButton" name="but_pullAll">
+    <property name="geometry">
+     <rect>
+      <x>560</x>
+      <y>130</y>
+      <width>98</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Pull All</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="but_clone">
     <property name="geometry">
      <rect>
       <x>560</x>
@@ -184,7 +184,20 @@
      </rect>
     </property>
     <property name="text">
-     <string>Restore</string>
+     <string>Clone</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="but_addPeer">
+    <property name="geometry">
+     <rect>
+      <x>440</x>
+      <y>440</y>
+      <width>98</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Add Peer</string>
     </property>
    </widget>
   </widget>
@@ -193,7 +206,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>708</width>
      <height>25</height>
     </rect>
    </property>

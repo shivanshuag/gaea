@@ -131,5 +131,5 @@ elif len(args.all) >= 4:
         puts(colored.red("Incorrect Usage"))
 
 else:
-    puts(colored.red("Incorrect Usage"))
+    puts(colored.red("Incorrect Usage-"))
     exit(0)
