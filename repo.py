@@ -17,11 +17,11 @@ def LoadRepo():
         dataMap = yaml.safe_load(f)
         f.close()
         globals.REPOINFO = dataMap
-        f = open(peerFile, 'r+')
+        f = open(peerFile, 'r')
         globals.PEERINFO = yaml.safe_load(f)
         globals.PEERINFO['peers'].update(helpers.mergePeers())
-        yaml.dump(globals.PEERINFO,f,default_flow_style=False)
         f.close()
+        helpers.dumpPeerDirec(globals.PEERINFO)
     else:
         raise Exception('Not a Gaea Repository')
 
