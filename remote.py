@@ -219,8 +219,10 @@ def merge(pullPath, address):
     return conflictCount
 
 def addPeer(ip, path, username, password):
-    globals.PEERINFO['peers'][ip] = {'path':path, 'username':username, 'password':password}
+    globals.PEERINFO['peers'].update({ip:{'path':path, 'username':username, 'password':password}})
+    helpers.dumpPeerDirec(globals.PEERINFO)
 
 def deletePeer(ip):
     del globals.PEERINFO['peers'][ip]
+    helpers.dumpPeerDirec(globals.PEERINFO)
 

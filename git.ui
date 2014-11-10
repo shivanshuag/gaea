@@ -119,7 +119,7 @@
     <property name="geometry">
      <rect>
       <x>560</x>
-      <y>170</y>
+      <y>140</y>
       <width>98</width>
       <height>27</height>
      </rect>
@@ -132,7 +132,7 @@
     <property name="geometry">
      <rect>
       <x>560</x>
-      <y>210</y>
+      <y>190</y>
       <width>98</width>
       <height>27</height>
      </rect>
@@ -141,7 +141,7 @@
      <string>Clone</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="but_addPeer">
+   <widget class="QPushButton" name="but_managePeers">
     <property name="geometry">
      <rect>
       <x>440</x>
@@ -157,8 +157,8 @@
    <widget class="QPushButton" name="but_delete">
     <property name="geometry">
      <rect>
-      <x>430</x>
-      <y>230</y>
+      <x>560</x>
+      <y>100</y>
       <width>98</width>
       <height>27</height>
      </rect>
