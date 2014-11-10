@@ -48,10 +48,12 @@ def clone(ip, path, username, password, pull=False, rootPassword=None, newUserna
     scp.get(path, recursive=True)
     #after cloning, change the peerinfo file of the user
     globals.ROOT = os.path.join(globals.ROOT,os.path.basename(os.path.normpath(path)))
+    #check if this is a gaea repo
+    if not os.path.exists(os.path.join(globals.ROOT, '.gaea', 'snaps')) or not os.path.exists(os.path.join(globals.ROOT, '.gaea', 'peers')):
+        raise Exception("cloned path "+username+"@"+ip+":"+path+" is not a gaea repository")
     f = open(os.path.join(globals.ROOT, '.gaea', 'peers', 'peers.yml'))
     clonedPeers = yaml.safe_load(f)
     f.close()
-    print clonedPeers
     clonedPeers['peers'].update(helpers.mergePeers())
     if not pull:
         myMap = repo.initPeerDirec(rootPassword, newUsername, newPassword, clonedPeers)
@@ -225,4 +227,24 @@ def addPeer(ip, path, username, password):
 def deletePeer(ip):
     del globals.PEERINFO['peers'][ip]
     helpers.dumpPeerDirec(globals.PEERINFO)
+
+def syncPeer(ip, path, username, password):
+    ssh = SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    ssh.load_system_host_keys()
+    ssh.connect(ip, username=username, password=password)
+    scp = SCPClient(ssh.get_transport())
+    scp.get(path, recursive=True)
+    #after cloning, change the peerinfo file of the user
+    globals.ROOT = os.path.join(globals.ROOT,os.path.basename(os.path.normpath(path)))
+    #check if this is a gaea repo
+    if not os.path.exists(os.path.join(globals.ROOT, '.gaea', 'snaps')) or not os.path.exists(os.path.join(globals.ROOT, '.gaea', 'peers')):
+        raise Exception("cloned path "+username+"@"+ip+":"+path+" is not a gaea repository")
+    f = open(os.path.join(globals.ROOT, '.gaea', 'peers', 'peers.yml'))
+    clonedPeers = yaml.safe_load(f)
+    f.close()
+    clonedPeers['peers'].update(helpers.mergePeers())
+    globals.PEERINFO['peers'].update(clonedPeers['peers'])
+    helpers.dumpPeerDirec(globals.PEERINFO)
+    shutil.rmtree(os.path.basename(os.path.normpath(path)))
 
