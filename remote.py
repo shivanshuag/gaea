@@ -38,18 +38,10 @@ def findCommonAncestor(remoteInfo, localInfo):
         startLocal = localInfo[startLocal]['parent']
         startRemote = remoteInfo[startRemote]['parent']
 
-def clone(ip, path, username, password,pull=False):
-    #address = address.split(':')
-    #password = getpass.getpass('Password:')
-    #address = ip+':'+path
+def clone(ip, path, username, password, pull=False, rootPassword=None, username=None, password=None):
     ssh = SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     ssh.load_system_host_keys()
-    #addSplit = address[0].split('@')
-    #if(len(addSplit) == 2):
-    #ssh.connect(addSplit[1], username=addSplit[0], password=password)
-    #else:
-    #    ssh.connect(addSplit[0])
     ssh.connect(ip, username=username, password=password)
     scp = SCPClient(ssh.get_transport())
     scp.get(path, recursive=True)
@@ -61,7 +53,7 @@ def clone(ip, path, username, password,pull=False):
     print clonedPeers
     clonedPeers['peers'].update(helpers.mergePeers())
     if not pull:
-        myMap = repo.initPeerDirec(clonedPeers)
+        myMap = repo.initPeerDirec(rootPassword, username, password, clonedPeers)
         print myMap
         #push my peerrinfo the remote user
         f = open(myMap['ip'], 'w')
@@ -108,7 +100,7 @@ def pull(ip, path, username, password):
     #change the ROOT for clone to work
     perviousRoot = globals.ROOT
     globals.ROOT = pullPath
-    clone(ip, path, username, password, True)
+    clone(ip, path, username, password, pull=True)
     globals.ROOT = previousRoot
     os.chdir(globals.ROOT)
     #dump the updated peerinfo back to repo
