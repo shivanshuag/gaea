@@ -25,7 +25,7 @@ def LoadRepo():
     else:
         raise Exception('Not a Gaea Repository')
 
-def init():
+def init(rootPassword=None, username=None, password=None):
     try:
         LoadRepo()
         print 'Already a repository'
@@ -38,36 +38,35 @@ def init():
         os.makedirs(os.path.join(globals.ROOT, '.gaea', 'peers'))
         dataMap = {'HEAD':'0', 'latestId':'0', 'author': '', 'email': '', 'remote':{} }
         helpers.dump(dataMap)
-        initPeerDirec()
+        initPeerDirec(rootPassword, username, password)
         print "new repo created"
 
-def initPeerDirec(clonedPeers=None):
-    username = raw_input('Username:')
-    password = getpass.getpass('Password:')
+def initPeerDirec(rootPassword=None, username=None, password=None, clonedPeers=None):
+    if username == None:
+        username = raw_input('Username:')
+    if password == None:
+        password = getpass.getpass('Password:')
+    if rootPassword == None:
+        rootPassword = getpass.getpass('Give your system password:')
     peerMap = {'username':username, 'password':password, 'ip':helpers.getIp() ,'path':globals.ROOT, 'peers':{}}
     if(clonedPeers!=None):
         peerMap['peers'].update(clonedPeers['peers'])
         peerMap['peers'][clonedPeers['ip']]={'username':clonedPeers['username'], 'password':clonedPeers['password'], 'path':clonedPeers['path']}
-    #rootPassword = getpass.getpass('Give your system password:')
     try:
         grp.getgrnam('gaea')
     except KeyError:
-        p1 = Popen(['sudo', 'groupadd', 'gaea'], stdout=PIPE, stdin=PIPE)
+        p1 = Popen(['echo', rootPassword, '|', 'sudo', 'groupadd', 'gaea'], stdout=PIPE, stdin=PIPE)
         p1.wait()
-    #p1.communicate(rootPassword+'\n')
     try:
         pwd.getpwnam(username)
         print 'User '+username+' already exists. No new user created'
     except KeyError:
-        p2 = Popen(['sudo','useradd', '-G',  'gaea', '-p', password, username], stdout=PIPE)
+        p2 = Popen(['echo', rootPassword, '|', 'sudo','useradd', '-G',  'gaea', '-p', password, username], stdout=PIPE)
         p2.wait()
-    #p2.communicate(rootPassword+'\n')
-    p3 = Popen(['sudo','chgrp', '-R',  'gaea', globals.ROOT], stdout=PIPE)
+    p3 = Popen(['echo', rootPassword, '|', 'sudo','chgrp', '-R',  'gaea', globals.ROOT], stdout=PIPE)
     p3.wait()
-    #p3.communicate(rootPassword+'\n')
-    p4 = Popen(['sudo','chmod', '-R', 'g+rw', globals.ROOT], stdout=PIPE)
+    p4 = Popen(['echo', rootPassword, '|', 'sudo','chmod', '-R', 'g+rw', globals.ROOT], stdout=PIPE)
     p4.wait()
-    #p4.communicate(rootPassword+'\n')
     helpers.dumpPeerDirec(peerMap)
     return peerMap
 
