@@ -217,3 +217,10 @@ def merge(pullPath, address):
                 if mergeLines(filePathBase, filePathNew, filePathLatest, copyPath, f):
                     conflictCount += 1
     return conflictCount
+
+def addPeer(ip, path, username, password):
+    globals.PEERINFO['peers'][ip] = {'path':path, 'username':username, 'password':password}
+
+def deletePeer(ip):
+    del globals.PEERINFO['peers'][ip]
+
