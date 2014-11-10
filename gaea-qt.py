@@ -70,7 +70,7 @@ class CommitPromptWindow(QtGui.QMainWindow):
     parent = None
     def __init__(self, parent = None):
         QtGui.QMainWindow.__init__(self)
-        uic.loadUi('commitui.ui',self)
+        uic.loadUi(os.path.join(gaeaDir,'commitui.ui'),self)
         self.setWindowTitle("Commit Prompt")
         self.resize(350,200)
         self.move(500, 500)
@@ -118,12 +118,14 @@ class CommitPromptWindow(QtGui.QMainWindow):
 class CloneWindow(QtGui.QMainWindow):
     def __init__(self):
         QtGui.QMainWindow.__init__(self)
-        uic.loadUi(os.path.join(gaeaDir, 'prompt.ui'),self)
+        uic.loadUi(os.path.join(gaeaDir, 'prompt_clone.ui'),self)
         self.setWindowTitle("Clone")
         self.resize(350,400)
         self.move(500, 500)
         self.but.clicked.connect(self.clone)
         self.editPassword.setEchoMode(QtGui.QLineEdit.Password)
+        self.editNewPassword.setEchoMode(QtGui.QLineEdit.Password)
+        self.editRootPassword.setEchoMode(QtGui.QLineEdit.Password)
 
     def clone(self):
         print "button clicked"
@@ -135,9 +137,18 @@ class CloneWindow(QtGui.QMainWindow):
         print "name is ", Name
         Password = str(self.editPassword.text())
         print "password is ", Password
+        NewName = str(self.editNewName.text())
+        print "name is ", NewName
+        NewPassword = str(self.editNewPassword.text())
+        print "name is ", NewPassword
+        RootPassword = str(self.editRootPassword.text())
+        print "name is ", RootPassword
+
+
+
         if (IP.strip() and Path.strip() and Name.strip() and Password.strip()): 
             try:
-                remote.clone(IP, Path, Name, Password)
+                remote.clone(IP, Path, Name, Password, False, RootPassword, NewName, NewPassword)
                 self.close()
             except Exception, e:
                 print "error"
@@ -164,7 +175,8 @@ class CloneWindow(QtGui.QMainWindow):
 
 class PeerWindow(QtGui.QMainWindow):
     PeerSelected = []
-    def __init__(self):
+    parent = None
+    def __init__(self, parent):
         QtGui.QMainWindow.__init__(self)
         uic.loadUi(os.path.join(gaeaDir, 'peers.ui'),self)
         self.setWindowTitle("Peer Details")
@@ -177,7 +189,7 @@ class PeerWindow(QtGui.QMainWindow):
         self.but_pull.setEnabled(False)
         self.but_pullAll.clicked.connect(self.pullAll)
         self.populatePeers()
-
+        self.parent = parent
 
         
     def populatePeers(self):           #get PEER_INFO and populate it
@@ -238,11 +250,12 @@ class PeerWindow(QtGui.QMainWindow):
 
     def pullAll(self):
         print "pull all button pressed"
-        try:
-            remote.pullAll()
-        except Exception, e:
-            print e 
-            self.errorMessage(e)
+    #    try:
+        remote.pullAll()
+        self.parent.load()
+        # except Exception, e:
+        #     print e 
+        #     self.errorMessage(e)
 
 
     def pull(self):
@@ -256,8 +269,10 @@ class PeerWindow(QtGui.QMainWindow):
                     ip = globals.PEERINFO['peers'].keys()[self.PeerSelected[0]]
                     name = globals.PEERINFO['peers'][ip]['username']
                     path = globals.PEERINFO['peers'][ip]['path']
-                    password = globals.PEERINFO['peers'][key]['password']
-                    remote.pull(ip, path, username, password)
+                    password = globals.PEERINFO['peers'][ip]['password']
+                    print ip, name, path, password
+                    remote.pull(ip, path, name, password)
+                    self.parent.load()
                 except Exception, e:
                     print e
                     self.errorMessage(e)
@@ -664,7 +679,7 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
     def managePeers(self):
         print "peer button pressed"
         try:
-            self.myOtherWindow = PeerWindow()
+            self.myOtherWindow = PeerWindow(self)
             self.myOtherWindow.show()
         except Exception, e:
             print e 

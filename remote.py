@@ -86,46 +86,51 @@ def clone(ip, path, username, password, pull=False, rootPassword=None, newUserna
 def pullAll():
     peerInfo = globals.PEERINFO['peers']
     abort = False
+    print peerInfo.keys()
     for index,ip in enumerate(peerInfo.keys()):
         if 'pull' in globals.REPOINFO.keys():
             if index <= globals.REPOINFO['pull']:
+                print "continuing " + str(index)
                 continue
-        try:
-            globals.REPOINFO['pull'] = index
-            helpers.dump(globals.REPOINFO)
-            pull(ip, peerInfo[ip]['path'], peerInfo[ip]['username'], peerInfo['password'])
-        except Exception,e:
-            print e
-            abort = True;
-            break;
+
+        #try:
+        globals.REPOINFO['pull'] = index
+        helpers.dump(globals.REPOINFO)
+        pull(ip, peerInfo[ip]['path'], peerInfo[ip]['username'], peerInfo[ip]['password'])
+        # except Exception,e:
+        #     print e
+        #     abort = True;
+        #     break;
     if not abort:
-        del globals.PEERINFO['pull']
+        print "deleting"
+        del globals.REPOINFO['pull']
+        helpers.dump(globals.REPOINFO)
     pass
 
 def pull(ip, path, username, password):
-    if(commit.diff()):
+    if(repo.diff()):
         raise Exception('You have unsaved changes. Take their snapshot before pulling otherwise you may loose them.')
-    pullPath = os.path.join(globals.ROOT, '.gaea', 'pull', address.encode("hex"))
+    pullPath = os.path.join(globals.ROOT, '.gaea', 'pull', (ip+":"+path).encode("hex"))
     if not os.path.exists(pullPath):
         os.makedirs(pullPath)
     os.chdir(pullPath)
     #TODO add print to give feedback to the user about what is being done
     print 'Pulling '+username+'@'+ip+':'+path
     #change the ROOT for clone to work
-    perviousRoot = globals.ROOT
+    previousRoot = globals.ROOT
     globals.ROOT = pullPath
     clone(ip, path, username, password, pull=True)
     globals.ROOT = previousRoot
     os.chdir(globals.ROOT)
     #dump the updated peerinfo back to repo
     helpers.dump(globals.PEERINFO)
-    conflictCount = merge(pullPath, address)
+    conflictCount = merge(pullPath, (ip+":"+path))
     if conflictCount > 0:
         print "Total "+str(conflictCount)+" conflicts in merge\nFix them and take a snapshot before running pull again"
         raise Exception("Merge Conflict in "+username+'@'+ip+':'+path)
     else:
         if repo.diff():
-            commit.snap('hard', "Merged HEAD from "+ address)
+            commit.snap('hard', "Merged HEAD from "+ (ip+":"+path))
     shutil.rmtree(pullPath)
 
 def mergeLines(filePathBase, filePathNew, filePathLatest, copyPath, f, new=False):

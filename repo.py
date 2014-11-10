@@ -7,6 +7,7 @@ import getpass
 import grp
 import pwd
 from subprocess import Popen, PIPE
+import crypt
 
 def LoadRepo():
     yamlFile = os.path.join(globals.ROOT, '.gaea', 'gaea.yml')
@@ -49,6 +50,7 @@ def initPeerDirec(rootPassword=None, username=None, password=None, clonedPeers=N
     if rootPassword == None:
         rootPassword = getpass.getpass('Give your system password:')
     peerMap = {'username':username, 'password':password, 'ip':helpers.getIp() ,'path':globals.ROOT, 'peers':{}}
+    password = crypt.crypt(password, 'gaea')
     if(clonedPeers!=None):
         peerMap['peers'].update(clonedPeers['peers'])
         peerMap['peers'][clonedPeers['ip']]={'username':clonedPeers['username'], 'password':clonedPeers['password'], 'path':clonedPeers['path']}
