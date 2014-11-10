@@ -102,29 +102,6 @@
      <string>commit</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="but_pull">
-    <property name="geometry">
-     <rect>
-      <x>560</x>
-      <y>90</y>
-      <width>98</width>
-      <height>27</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Pull</string>
-    </property>
-   </widget>
-   <widget class="QTextEdit" name="edit_diff">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>270</y>
-      <width>311</width>
-      <height>211</height>
-     </rect>
-    </property>
-   </widget>
    <widget class="QPushButton" name="but_init">
     <property name="geometry">
      <rect>
@@ -149,19 +126,6 @@
     </property>
     <property name="text">
      <string>Restore</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="but_pullAll">
-    <property name="geometry">
-     <rect>
-      <x>560</x>
-      <y>130</y>
-      <width>98</width>
-      <height>27</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Pull All</string>
     </property>
    </widget>
    <widget class="QPushButton" name="but_clone">
@@ -224,6 +188,16 @@
     </property>
     <property name="text">
      <string>diff</string>
+    </property>
+   </widget>
+   <widget class="QListView" name="list_diff">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>270</y>
+      <width>311</width>
+      <height>192</height>
+     </rect>
     </property>
    </widget>
   </widget>

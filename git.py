@@ -98,7 +98,9 @@ class PeerWindow(QtGui.QMainWindow):
         self.but_add.clicked.connect(self.add)
         self.but_delete.clicked.connect(self.delete)
         self.but_delete.setEnabled(False)
-
+        self.but_pull.clicked.connect(self.pull)
+        self.but_pull.setEnabled(False)
+        self.but_pullAll.clicked.connect(self.pullAll)
         model = QtGui.QStandardItemModel()
         for i in range(10):
             item = QtGui.QStandardItem('Item %s' % randint(1, 100))
@@ -130,9 +132,10 @@ class PeerWindow(QtGui.QMainWindow):
 
         if(len(self.PeerSelected) == 0):
             self.but_delete.setEnabled(False)
+            self.but_pull.setEnabled(False)
         else:
             self.but_delete.setEnabled(True)
-
+            self.but_pull.setEnabled(True)
 
     def add(self):
         print "add button clicked"
@@ -146,6 +149,15 @@ class PeerWindow(QtGui.QMainWindow):
         if reply == QtGui.QMessageBox.Yes:
             print "delete", self.PeerSelected
 
+    def pullAll(self):
+        print "pull all button pressed"
+
+    def pull(self):
+        print "pull button pressed"
+        pull_msg = "Are you sure you want to pull from " + str(self.PeerSelected)[1:-1]
+        reply = QtGui.QMessageBox.question(self, 'Message', pull_msg, QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
+        if reply == QtGui.QMessageBox.Yes:
+            print "pull from ", self.PeerSelected
 
 class AddPeerWindow(QtGui.QMainWindow):
     def __init__(self):
@@ -181,8 +193,8 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
     #    self.but_remote.clicked.connect(self.setRemote)
 
     #    self.but_push.clicked.connect(self.push)
-        self.but_pullAll.clicked.connect(self.pullAll)
-        self.but_pull.clicked.connect(self.pull)
+    #    self.but_pullAll.clicked.connect(self.pullAll)
+    #    self.but_pull.clicked.connect(self.pull)
         self.but_commit.clicked.connect(self.snap)
         self.but_init.clicked.connect(self.init)
     #    self.but_log.clicked.connect(self.log)
@@ -206,13 +218,30 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
         model = QtGui.QStandardItemModel()
         for i in range(10):
             item = QtGui.QStandardItem('Item %s' % randint(1, 100))
+
+            # item.setForeground
+
+            # b = QtGui.QBrush()
+
+
+            # b.setColor(QtCore.Qt.red)
+            # item.setBackground(b)
+            if i%2 == 0 :
+                brush = QtGui.QBrush(QtGui.QColor(255, 0, 0))
+            else :
+                brush = QtGui.QBrush(QtGui.QColor(0, 255, 0))
+
+            brush.setStyle(QtCore.Qt.SolidPattern)
+            item.setForeground(brush)
+
             check = QtCore.Qt.Unchecked
             item.setCheckState(check)
             item.setCheckable(True)
             item.setEditable(False)
+            #item.setBackgroundColor(QtCore.Qt.blue)
+            #Qt.QColor rowColor = QtCore.Qt.blue
+#            item.setData(QtCore.Qt.blue, QtCore.Qt.ForegroundRole)
             model.appendRow(item)
-
-
 #        model.setStringList(QtCore.QString("Item 1;Item 2;Item 3;Item 4").split(";"))    
         self.list_commit.setModel(model)
         self.list_commit.clicked.connect(self.listClicked)
@@ -228,6 +257,7 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
         self.actionExit.setShortcut('Alt+F4')
         self.actionExit.triggered.connect(self.exit)
         #print "cwd is " + globals.ROOT
+
     
     @QtCore.pyqtSlot(QtCore.QModelIndex)
     def listClicked(self, index):
@@ -310,7 +340,27 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
     #             print e
 
     def diff(self):
+
         print "diff called"
+        
+        ## this is how to populate the list_diff
+        # model = QtGui.QStandardItemModel()
+        # for i in range(20):
+        #     item = QtGui.QStandardItem('Item %s' % randint(1, 100))
+        #     if i%2 == 0 :
+        #         brush = QtGui.QBrush(QtGui.QColor(255, 0, 0))
+        #     else :
+        #         brush = QtGui.QBrush(QtGui.QColor(0, 255, 0))
+
+        #     brush.setStyle(QtCore.Qt.SolidPattern)
+        #     item.setForeground(brush)
+        #     item.setEditable(False)
+        #     model.appendRow(item)
+        # self.list_diff.setModel(model)
+
+
+
+
         print "diff list is ", self.diffList
         if(len(self.diffList) == 1):
             print "diff of current state and ", self.diffList[0]
@@ -363,9 +413,30 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
 
     def delete(self):
         print "delete button pressed"
+        if(len(self.diffList) == 0):
+            print "select atleast one"
+            msgBox = QtGui.QMessageBox() 
+            msgBox.setWindowTitle("Error!")
+            msgBox.setText("Please select the commit you want to delete.")
+            msgBox.exec_()
 
-    def pullAll(self):
-        print "pull all button pressed"
+        elif(len(self.diffList) > 1):
+            print "select atleast one"
+            msgBox = QtGui.QMessageBox() 
+            msgBox.setWindowTitle("Error!")
+            msgBox.setText("You have selected more than one commits. Please delete one by one.")
+            msgBox.exec_()
+
+        elif(len(self.diffList) == 1):
+            del_msg = "Are you sure you want to delete " + str(self.diffList[0])
+            reply = QtGui.QMessageBox.question(self, 'Message', del_msg, QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
+            if reply == QtGui.QMessageBox.Yes:
+                print "del", self.diffList[0]
+
+
+
+    # def pullAll(self):
+    #     print "pull all button pressed"
 
     def displayDiff(self):
         try:
@@ -414,20 +485,46 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
         self.myOtherWindow.show()
 
     def restore(self):
-        text, ok = QtGui.QInputDialog.getText(self, 'Input Dialog', 'Enter commit id:')
-        if ok:
-            print "commit id is ", str(text)
-            try:
-                repo.LoadRepo()
-                commit.restore(str(text))
-            except Exception,e:
-                print e
+        if(len(self.diffList) == 0):
+            print "select atleast one"
+            msgBox = QtGui.QMessageBox() 
+            msgBox.setWindowTitle("Error!")
+            msgBox.setText("Please select the commit you want to restore.")
+            msgBox.exec_()
+
+        elif(len(self.diffList) > 1):
+            print "select atleast one"
+            msgBox = QtGui.QMessageBox() 
+            msgBox.setWindowTitle("Error!")
+            msgBox.setText("You have selected more than one commits.")
+            msgBox.exec_()
+
+        elif(len(self.diffList) == 1):
+            restore_msg = "Are you sure you want to restore " + str(self.diffList[0])
+            reply = QtGui.QMessageBox.question(self, 'Message', restore_msg, QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
+            if reply == QtGui.QMessageBox.Yes:
+                print "restore", self.diffList[0]
+        #        try:
+        #         repo.LoadRepo()
+        #         commit.restore(str(text))
+        #     except Exception,e:
+        #         print e
+
+        ## old part, leave it commented
+        # text, ok = QtGui.QInputDialog.getText(self, 'Input Dialog', 'Enter commit id:')
+        # if ok:
+        #     print "commit id is ", str(text)
+        #     try:
+        #         repo.LoadRepo()
+        #         commit.restore(str(text))
+        #     except Exception,e:
+        #         print e
 
     def enableButtons(self):
         self.but_name.setEnabled(True)
         self.but_email.setEnabled(True)
-        self.but_pullAll.setEnabled(True)
-        self.but_pull.setEnabled(True)
+        #self.but_pullAll.setEnabled(True)
+        #self.but_pull.setEnabled(True)
         self.but_commit.setEnabled(True)
         self.but_delete.setEnabled(True)
         self.but_clone.setEnabled(True)
@@ -439,8 +536,8 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
     def disableButtons(self):
         self.but_name.setEnabled(False)
         self.but_email.setEnabled(False)
-        self.but_pullAll.setEnabled(False)
-        self.but_pull.setEnabled(False)
+        #self.but_pullAll.setEnabled(False)
+        #self.but_pull.setEnabled(False)
         self.but_commit.setEnabled(False)
         self.but_delete.setEnabled(False)
         self.but_clone.setEnabled(False)
