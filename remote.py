@@ -4,6 +4,7 @@ import getpass
 from scp import SCPClient
 from bzrlib.merge3 import Merge3
 
+import sys
 import os
 import globals
 import commit
@@ -40,6 +41,10 @@ def findCommonAncestor(remoteInfo, localInfo):
         startRemote = remoteInfo[startRemote]['parent']
 
 def clone(ip, path, username, password, pull=False, rootPassword=None, newUsername=None, newPassword=None):
+    print username
+    print password
+    print ip
+    print path
     ssh = SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     ssh.load_system_host_keys()
@@ -47,9 +52,13 @@ def clone(ip, path, username, password, pull=False, rootPassword=None, newUserna
     scp = SCPClient(ssh.get_transport())
     scp.get(path, recursive=True)
     #after cloning, change the peerinfo file of the user
+    oldroot = globals.ROOT
     globals.ROOT = os.path.join(globals.ROOT,os.path.basename(os.path.normpath(path)))
+    print globals.ROOT
+    sys.stdout.flush()
     #check if this is a gaea repo
     if not os.path.exists(os.path.join(globals.ROOT, '.gaea', 'snaps')) or not os.path.exists(os.path.join(globals.ROOT, '.gaea', 'peers')):
+        globals.ROOT = oldroot
         raise Exception("cloned path "+username+"@"+ip+":"+path+" is not a gaea repository")
     f = open(os.path.join(globals.ROOT, '.gaea', 'peers', 'peers.yml'))
     clonedPeers = yaml.safe_load(f)

@@ -1,6 +1,7 @@
 import sys
 from PyQt4 import QtCore, QtGui, uic
 from random import *
+import os
 
 #import gaea
 import globals
@@ -11,13 +12,15 @@ import remote
 from clint.arguments import Args
 from clint.textui import puts, colored, indent
 
-form_class = uic.loadUiType("git.ui")[0]                 # Load the UI
+gaeaDir = os.getcwd()
+form_class = uic.loadUiType(os.path.join(gaeaDir, "git.ui"))[0]                 # Load the UI
+projectDir = None
 
 class InitPromptWindow(QtGui.QMainWindow):
     parent = None
     def __init__(self, parent):
         QtGui.QMainWindow.__init__(self)
-        uic.loadUi('initui.ui',self)
+        uic.loadUi(os.path.join(gaeaDir, 'initui.ui'),self)
         self.setWindowTitle("Init Prompt")
         self.resize(350,400)
         self.move(500, 500)
@@ -115,7 +118,7 @@ class CommitPromptWindow(QtGui.QMainWindow):
 class CloneWindow(QtGui.QMainWindow):
     def __init__(self):
         QtGui.QMainWindow.__init__(self)
-        uic.loadUi('prompt.ui',self)
+        uic.loadUi(os.path.join(gaeaDir, 'prompt.ui'),self)
         self.setWindowTitle("Clone")
         self.resize(350,400)
         self.move(500, 500)
@@ -163,7 +166,7 @@ class PeerWindow(QtGui.QMainWindow):
     PeerSelected = []
     def __init__(self):
         QtGui.QMainWindow.__init__(self)
-        uic.loadUi('peers.ui',self)
+        uic.loadUi(os.path.join(gaeaDir, 'peers.ui'),self)
         self.setWindowTitle("Peer Details")
         self.resize(350,600)
         self.move(500, 500)
@@ -272,7 +275,7 @@ class AddPeerWindow(QtGui.QMainWindow):
     parent = None
     def __init__(self, parent):
         QtGui.QMainWindow.__init__(self)
-        uic.loadUi('prompt.ui',self)
+        uic.loadUi(os.path.join(gaeaDir, 'prompt.ui'),self)
         self.setWindowTitle("Add Peer")
         self.resize(350,400)
         self.move(500, 500)
@@ -417,7 +420,9 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
     	self.txt_path1.setText(fname)
         globals.changeCWD(fname)
         print "ROOT name changed to ", fname
+        projectDir = fname
         print globals.ROOT
+        os.chdir(globals.ROOT)
 
         self.load()
 
@@ -721,6 +726,7 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
         msgBox.setWindowTitle("Error!")
         msgBox.setText(str)
         msgBox.exec_()
+        globals.ROOT = projectDir
 
 app = QtGui.QApplication(sys.argv)
 myWindow = MyWindowClass(None)
