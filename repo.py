@@ -17,7 +17,7 @@ def LoadRepo():
         dataMap = yaml.safe_load(f)
         f.close()
         globals.REPOINFO = dataMap
-        f = open(peerFile)
+        f = open(peerFile, 'r+')
         globals.PEERINFO = yaml.safe_load(f)
         globals.PEERINFO['peers'].update(helpers.mergePeers())
         yaml.dump(globals.PEERINFO,f,default_flow_style=False)
@@ -55,18 +55,14 @@ def initPeerDirec(rootPassword=None, username=None, password=None, clonedPeers=N
     try:
         grp.getgrnam('gaea')
     except KeyError:
-        p1 = Popen(['echo', rootPassword, '|', 'sudo', 'groupadd', 'gaea'], stdout=PIPE, stdin=PIPE)
-        p1.wait()
+        os.system('echo '+rootPassword+' | sudo -S groupadd gaea')
     try:
         pwd.getpwnam(username)
         print 'User '+username+' already exists. No new user created'
     except KeyError:
-        p2 = Popen(['echo', rootPassword, '|', 'sudo','useradd', '-G',  'gaea', '-p', password, username], stdout=PIPE)
-        p2.wait()
-    p3 = Popen(['echo', rootPassword, '|', 'sudo','chgrp', '-R',  'gaea', globals.ROOT], stdout=PIPE)
-    p3.wait()
-    p4 = Popen(['echo', rootPassword, '|', 'sudo','chmod', '-R', 'g+rw', globals.ROOT], stdout=PIPE)
-    p4.wait()
+        os.system('echo '+rootPassword+' | sudo -S useradd -G gaea -p '+password+' '+username)
+    os.system('echo '+rootPassword+' | sudo -S chgrp -R gaea '+globals.ROOT)
+    os.system('chmod -R g+rw '+globals.ROOT)
     helpers.dumpPeerDirec(peerMap)
     return peerMap
 
@@ -117,9 +113,10 @@ def diff(id1=None,id2=None):
 
 def log():
     parent = globals.REPOINFO['latestId']
-    log = ''
+    log = []
     while parent in globals.REPOINFO.keys():
-        log = log + parent + ':\n\tMessage - ' + globals.REPOINFO[parent]['message'] + '\n\tAuthor - '+globals.REPOINFO[parent]['author']+'\n\tTime-'+globals.REPOINFO[parent]['time']+'\n\n'
+        node = globals.REPOINFO[parent]
+        log.append((parent, node['message'], node['author'],node['time']))
         parent = globals.REPOINFO[parent]['parent']
     return log
 

@@ -11,6 +11,7 @@ import repo
 import helpers
 import shutil
 import yaml
+from subprocess import Popen, PIPE
 
 
 def findCommonAncestor(remoteInfo, localInfo):
@@ -38,7 +39,7 @@ def findCommonAncestor(remoteInfo, localInfo):
         startLocal = localInfo[startLocal]['parent']
         startRemote = remoteInfo[startRemote]['parent']
 
-def clone(ip, path, username, password, pull=False, rootPassword=None, username=None, password=None):
+def clone(ip, path, username, password, pull=False, rootPassword=None, newUsername=None, newPassword=None):
     ssh = SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     ssh.load_system_host_keys()
@@ -53,7 +54,7 @@ def clone(ip, path, username, password, pull=False, rootPassword=None, username=
     print clonedPeers
     clonedPeers['peers'].update(helpers.mergePeers())
     if not pull:
-        myMap = repo.initPeerDirec(rootPassword, username, password, clonedPeers)
+        myMap = repo.initPeerDirec(rootPassword, newUsername, newPassword, clonedPeers)
         print myMap
         #push my peerrinfo the remote user
         f = open(myMap['ip'], 'w')
@@ -62,7 +63,9 @@ def clone(ip, path, username, password, pull=False, rootPassword=None, username=
         yaml.dump(myPeerInfo, f, default_flow_style=False)
         f.close()
         scp.put(myMap['ip'], os.path.join(path, '.gaea', 'peers'))
-        #os.remove(myMap['ip'])
+        #change the permissions of pushed file
+        ssh.exec_command('chmod 777 '+os.path.join(path, '.gaea', 'peers', myMap['ip']))
+        os.remove(myMap['ip'])
     else:
         globals.PEERINFO['peers'].update(clonedPeers['peers'])
     ssh.close()
