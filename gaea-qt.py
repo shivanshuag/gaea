@@ -133,7 +133,12 @@ class CloneWindow(QtGui.QMainWindow):
         Password = str(self.editPassword.text())
         print "password is ", Password
         if (IP.strip() and Path.strip() and Name.strip() and Password.strip()): 
-            remote.clone(IP, Path, Name, Password)
+            try:
+                remote.clone(IP, Path, Name, Password)
+                self.close()
+            except Exception, e:
+                print "error"
+                self.errorMessage(e)
         else:
             if not IP.strip():
                 self.errorMessage("IP filed cannot be empty")
@@ -145,6 +150,12 @@ class CloneWindow(QtGui.QMainWindow):
                 self.errorMessage("Password filed cannot be empty")
             print "error"
                 
+    def errorMessage(self,str):
+        print "error"
+        msgBox = QtGui.QMessageBox() 
+        msgBox.setWindowTitle("Error!")
+        msgBox.setText(str)
+        msgBox.exec_()    
 
 
 
@@ -471,13 +482,14 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
     #             print e
 
     def populateDiffInList(self,difference):
+        print difference
         model = QtGui.QStandardItemModel()
         for line in iter(difference.splitlines()):
             item = QtGui.QStandardItem(line)
-            if line[0]=='+' and line[1] != '+':
+            if line[0]=='+' and (len(line) <2 or line[1] != '+'):
                 brush = QtGui.QBrush(QtGui.QColor(0, 255, 0)) #Green
 
-            elif line[0]=='-' and line[2] != '-':
+            elif line[0]=='-' and (len(line) <2 or line[2] != '-'):
                 brush = QtGui.QBrush(QtGui.QColor(255, 0, 0)) #Red
 
             else:
