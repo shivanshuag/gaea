@@ -220,7 +220,9 @@ def merge(pullPath, address):
 
 def addPeer(ip, path, username, password):
     globals.PEERINFO['peers'][ip] = {'path':path, 'username':username, 'password':password}
+    helpers.dumpPeerDirec(globals.PEERINFO)
 
 def deletePeer(ip):
     del globals.PEERINFO['peers'][ip]
+    helpers.dumpPeerDirec(globals.PEERINFO)
 
