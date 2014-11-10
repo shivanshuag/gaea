@@ -70,7 +70,8 @@ class CommitPromptWindow(QtGui.QMainWindow):
     parent = None
     def __init__(self, parent = None):
         QtGui.QMainWindow.__init__(self)
-        uic.loadUi(os.path.join(gaeaDir,'commitui.ui'),self)
+        uic.loadUi(os.path.join(gaeaDir, 'commitui.ui'),self)
+
         self.setWindowTitle("Commit Prompt")
         self.resize(350,200)
         self.move(500, 500)
@@ -430,6 +431,7 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
     #     QMessageBox.information(None,"Hello!","You Clicked: \n"+index.data().toString())
 
     def openFile(self):
+        global projectDir
 #    	fname = QtGui.QFileDialog.getOpenFileName(self, 'Open file', '/home')
         fname = QtGui.QFileDialog.getExistingDirectory(self, 'Open Directory', '\home')
     	self.txt_path1.setText(fname)
