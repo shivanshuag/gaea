@@ -64,6 +64,8 @@ def clone(ip, path, username, password, pull=False, rootPassword=None, newUserna
     clonedPeers = yaml.safe_load(f)
     f.close()
     clonedPeers['peers'].update(helpers.mergePeers())
+    if helpers.getIp() in clonedPeers['peers']:
+        del clonedPeers['peers'][helpers.getIp()]
     if not pull:
         myMap = repo.initPeerDirec(rootPassword, newUsername, newPassword, clonedPeers)
         print myMap
@@ -142,7 +144,7 @@ def mergeLines(filePathBase, filePathNew, filePathLatest, copyPath, f, new=False
     latestLines = helpers.readFile(filePathLatest)
 
     mg = Merge3(baseLines, newLines, latestLines)
-    merg = mg.merge_lines(name_a=filePathNew,name_b=filePathLatest,name_base=filePathBase, reprocess=True)
+    merg = mg.merge_lines(name_a=filePathNew,name_b=filePathLatest,name_base=filePathBase)
     merged = '\n'.join(merg)
     #print merged
     if merged:
