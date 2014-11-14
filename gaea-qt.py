@@ -265,17 +265,17 @@ class PeerWindow(QtGui.QMainWindow):
         if reply == QtGui.QMessageBox.Yes:
             print "pull from ", self.PeerSelected
             if len(self.PeerSelected) == 1:
-                try:
-                    ip = globals.PEERINFO['peers'].keys()[self.PeerSelected[0]]
-                    name = globals.PEERINFO['peers'][ip]['username']
-                    path = globals.PEERINFO['peers'][ip]['path']
-                    password = globals.PEERINFO['peers'][ip]['password']
-                    print ip, name, path, password
-                    remote.pull(ip, path, name, password)
-                    self.parent.load()
-                except Exception, e:
-                    print e
-                    self.errorMessage(str(e))
+                #try:
+                ip = globals.PEERINFO['peers'].keys()[self.PeerSelected[0]]
+                name = globals.PEERINFO['peers'][ip]['username']
+                path = globals.PEERINFO['peers'][ip]['path']
+                password = globals.PEERINFO['peers'][ip]['password']
+                print ip, name, path, password
+                remote.pull(ip, path, name, password)
+                self.parent.load()
+                # except Exception, e:
+                #     print e
+                #     self.errorMessage(str(e))
 
     def errorMessage(self,str):
         print "error"
@@ -511,14 +511,15 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
         model = QtGui.QStandardItemModel()
         for line in iter(difference.splitlines()):
             item = QtGui.QStandardItem(line)
-            if line[0]=='+' and (len(line) <2 or line[1] != '+'):
-                brush = QtGui.QBrush(QtGui.QColor(0, 255, 0)) #Green
+            if len(line) > 0:
+                if line[0]=='+' and (len(line) <2 or line[1] != '+'):
+                    brush = QtGui.QBrush(QtGui.QColor(0, 255, 0)) #Green
 
-            elif line[0]=='-' and (len(line) <2 or line[2] != '-'):
-                brush = QtGui.QBrush(QtGui.QColor(255, 0, 0)) #Red
+                elif line[0]=='-' and (len(line) <2 or line[1] != '-'):
+                    brush = QtGui.QBrush(QtGui.QColor(255, 0, 0)) #Red
 
-            else:
-                brush = QtGui.QBrush(QtGui.QColor(0,0,0)) #black
+                else:
+                    brush = QtGui.QBrush(QtGui.QColor(0,0,0)) #black
 
             brush.setStyle(QtCore.Qt.SolidPattern)
             item.setForeground(brush)

@@ -123,7 +123,7 @@ def pull(ip, path, username, password):
     globals.ROOT = previousRoot
     os.chdir(globals.ROOT)
     #dump the updated peerinfo back to repo
-    helpers.dump(globals.PEERINFO)
+    helpers.dumpPeerDirec(globals.PEERINFO)
     conflicts, conflictCount = merge(pullPath, (ip+":"+path))
     if conflictCount > 0:
         s =  "Total "+str(conflictCount)+" conflicts in merge\nFix them and take a snapshot before running pull again"
