@@ -71,6 +71,7 @@ def initPeerDirec(rootPassword=None, username=None, password=None, clonedPeers=N
 
 def diff(id1=None,id2=None):
     head = globals.REPOINFO['HEAD']
+    difference = ''
     if head != '0':
         if id1 == None:
             dir1 = os.path.join(globals.ROOT,'.gaea', 'snaps', head)
@@ -82,7 +83,6 @@ def diff(id1=None,id2=None):
         else:
             id2 = helpers.getFullSnapId(id2)
             dir2 = os.path.join(globals.ROOT, '.gaea', 'snaps', id2)
-        difference = ''
         filesDone = []
         for root, subFolders, files in os.walk(dir2):
             if '.gaea' in subFolders:
@@ -109,7 +109,16 @@ def diff(id1=None,id2=None):
 
 
     else:
-         difference = 'No snapshot has been taken so far'
+        dir2 = globals.ROOT
+        for root, subFolders, files in os.walk(dir2):
+            if '.gaea' in subFolders:
+                subFolders.remove('.gaea')
+            for f in files:
+                filePath2 = os.path.join(root, f)
+                f2 = helpers.readFile(filePath2)
+                unifiedDiff = difflib.unified_diff('', f2, tofile=filePath2)
+                difference = difference + ''.join(unifiedDiff)
+    print difference
     return difference
 
 

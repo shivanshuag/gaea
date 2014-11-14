@@ -91,6 +91,10 @@ def delete(snapId):
     else:
         if parent != '0':
             del globals.REPOINFO[parent]['child']
+    if snapId == head:
+        globals.REPOINFO['HEAD'] = globals.REPOINFO[snapId]['parent']
+    if snapId == latest:
+        globals.REPOINFO['latestId'] = globals.REPOINFO['HEAD']
     del globals.REPOINFO[snapId]
     snapDir = os.path.join(globals.ROOT, '.gaea', 'snaps', snapId)
     shutil.rmtree(snapDir)

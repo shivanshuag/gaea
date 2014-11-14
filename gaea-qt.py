@@ -46,14 +46,14 @@ class InitPromptWindow(QtGui.QMainWindow):
                 self.close()
             except Exception, e:
                 print "error"
-                self.errorMessage(e)  
+                self.errorMessage(str(e))  
         else :
             if not name.strip():
-                self.errorMessage("IP filed cannot be empty")
+                self.errorMessage("Name field cannot be empty")
             elif not Password.strip():
-                self.errorMessage("Path filed cannot be empty")
+                self.errorMessage("Password field cannot be empty")
             elif not RootPassword.strip():
-                self.errorMessage("Name filed cannot be empty")
+                self.errorMessage("RootPassword field cannot be empty")
             print "error"
 
     def errorMessage(self,str):
@@ -76,10 +76,7 @@ class CommitPromptWindow(QtGui.QMainWindow):
         self.resize(350,200)
         self.move(500, 500)
         self.but.clicked.connect(self.commit)
-        self.radioSoft.setChecked(True)
-        self.radioHard.setChecked(False)
     #    self.radioSoft.toggled.connect(self.softClick)
-        self.radioHard.toggled.connect(self.hardClick)
         self.parent = parent
 
     def commit(self):
@@ -87,10 +84,10 @@ class CommitPromptWindow(QtGui.QMainWindow):
         message = str(self.editMessage.text())
         print "msg is ", message, " toggle is ", self.t
         try:       
-            if self.t == 0:
-                commit.snap('soft', message)
-            elif self.t == 1:
-                commit.snap('hard', message)
+        #if self.t == 0:
+            commit.snap('soft', message)
+        # elif self.t == 1:
+        #     commit.snap('hard', message)
             self.parent.load()
             self.close()
 
@@ -99,20 +96,20 @@ class CommitPromptWindow(QtGui.QMainWindow):
             print "error"
             msgBox = QtGui.QMessageBox() 
             msgBox.setWindowTitle("Error!")
-            msgBox.setText(e)
+            msgBox.setText(str(e))
             msgBox.exec_()    
 
-    def softClick(self):
-        self.t = 1 - self.t
-        print "toggle ", t
-        # self.radioSoft.setChecked(True)
-        # self.radioHard.setChecked(False)
+    # def softClick(self):
+    #     self.t = 1 - self.t
+    #     print "toggle ", t
+    #     # self.radioSoft.setChecked(True)
+    #     # self.radioHard.setChecked(False)
 
-    def hardClick(self):
-        self.t = 1 - self.t
-        print "toggle ", self.t
-        # self.radioSoft.setChecked(False)
-        # self.radioHard.setChecked(True)
+    # def hardClick(self):
+    #     self.t = 1 - self.t
+    #     print "toggle ", self.t
+    #     # self.radioSoft.setChecked(False)
+    #     # self.radioHard.setChecked(True)
 
 
 
@@ -153,16 +150,16 @@ class CloneWindow(QtGui.QMainWindow):
                 self.close()
             except Exception, e:
                 print "error"
-                self.errorMessage(e)
+                self.errorMessage(str(e))
         else:
             if not IP.strip():
-                self.errorMessage("IP filed cannot be empty")
+                self.errorMessage("IP field cannot be empty")
             elif not Path.strip():
-                self.errorMessage("Path filed cannot be empty")
+                self.errorMessage("Path field cannot be empty")
             elif not Name.strip():
-                self.errorMessage("Name filed cannot be empty")
+                self.errorMessage("Name field cannot be empty")
             elif not Password.strip():
-                self.errorMessage("Password filed cannot be empty")
+                self.errorMessage("Password field cannot be empty")
             print "error"
                 
     def errorMessage(self,str):
@@ -247,7 +244,7 @@ class PeerWindow(QtGui.QMainWindow):
                 self.populatePeers()
             except Exception, e:
                 print e
-                self.errorMessage(e)
+                self.errorMessage(str(e))
 
     def pullAll(self):
         print "pull all button pressed"
@@ -276,7 +273,7 @@ class PeerWindow(QtGui.QMainWindow):
                     self.parent.load()
                 except Exception, e:
                     print e
-                    self.errorMessage(e)
+                    self.errorMessage(str(e))
 
     def errorMessage(self,str):
         print "error"
@@ -316,16 +313,16 @@ class AddPeerWindow(QtGui.QMainWindow):
                 self.close()
             except Exception, e:
                 print "error"
-                self.errorMessage(e)
+                self.errorMessage(str(e))
         else:
             if not IP.strip():
-                self.errorMessage("IP filed cannot be empty")
+                self.errorMessage("IP field cannot be empty")
             elif not Path.strip():
-                self.errorMessage("Path filed cannot be empty")
+                self.errorMessage("Path field cannot be empty")
             elif not Name.strip():
-                self.errorMessage("Name filed cannot be empty")
+                self.errorMessage("Name field cannot be empty")
             elif not Password.strip():
-                self.errorMessage("Password filed cannot be empty")
+                self.errorMessage("Password field cannot be empty")
             print "error"
 
     def errorMessage(self,str):
@@ -385,6 +382,8 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
         # self.list_commit.clicked.connect(self.listClicked)
 
         self.disableButtons()
+        self.list_commit.clicked.connect(self.listClicked)
+
 
     #    QtCore.QObject.connect(self.list_commit,QtCore.SIGNAL("clicked(QModelIndex)"), self.list_commit, QtCore.SLOT("ItemClicked(QModelIndex)"))
 
@@ -440,7 +439,7 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
         projectDir = fname
         print globals.ROOT
         os.chdir(globals.ROOT)
-
+        self.disableButtons()
         self.load()
 
             # clone and init enable, else disableButtons
@@ -449,12 +448,14 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
     def load(self):
         try:
             print "load called"
+            self.diffList = []
             repo.LoadRepo()   ### already a repo
             self.enableButtons()
             self.log()
             self.diff()
             self.but_init.setEnabled(False)
             self.but_clone.setEnabled(False)
+
         except Exception, e:
             print e
             self.but_init.setEnabled(True)
@@ -478,7 +479,7 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
                 repo.setAuthor(str(text))
             except Exception,e:
                 print e
-                self.errorMessage(e)
+                self.errorMessage(str(e))
 
     def setEmail(self):
         text, ok = QtGui.QInputDialog.getText(self, 'Input Dialog', 'Enter your email address:')
@@ -490,7 +491,7 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
                 repo.setEmail(str(text))
             except Exception, e:
                 print e
-                self.errorMessage(e)
+                self.errorMessage(str(e))
     # def setRemote(self):
     #     name, ok = QtGui.QInputDialog.getText(self, 'Input Dialog', 'Enter remote name:')
     #     if ok:
@@ -571,7 +572,7 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
 
         except Exception, e:
             print e
-            self.errorMessage(e)
+            self.errorMessage(str(e))
 
     # this function has been shifted to another window
     # def pull(self):   
@@ -600,9 +601,11 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
                 print "del", self.diffList[0]
                 try:
                     commit.delete(self.all_logs[self.diffList[0]][0])
+                    print "delete done", self.all_logs[self.diffList[0]][0]
+                    self.load()
                 except Exception, e:
                     print e
-                    self.errorMessage(e)        
+                    self.errorMessage(str(e))        
 
                 # try:
                 #     repo.LoadRepo()
@@ -628,7 +631,7 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
                     puts(colored.white(line, False, True))
         except Exception, e:
             print e
-            self.errorMessage(e)
+            self.errorMessage(str(e))
         self.edit_diff.setText("diff of two commits comes here")  
 
     def init(self):
@@ -641,7 +644,7 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
 
         except Exception, e:
             print e
-            self.errorMessage(e)
+            self.errorMessage(str(e))
         
 
     def log(self):
@@ -663,10 +666,9 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
                 item.setEditable(False)
                 model.appendRow(item)
             self.list_commit.setModel(model)
-            self.list_commit.clicked.connect(self.listClicked)
         except Exception, e:
             print e
-            self.errorMessage(e)
+            self.errorMessage(str(e))
 
     def clone(self):
         print "clone button pressed"
@@ -675,7 +677,7 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
             self.myOtherWindow.show()
         except Exception, e:
             print e 
-            self.errorMessage(e)
+            self.errorMessage(str(e))
         
 
     def managePeers(self):
@@ -685,7 +687,7 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
             self.myOtherWindow.show()
         except Exception, e:
             print e 
-            self.errorMessage(e)
+            self.errorMessage(str(e))
 
     def restore(self):
         if(len(self.diffList) == 0):
@@ -712,7 +714,7 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
                 self.load()
             except Exception,e:
                 print e
-                self.errorMessage(e)
+                self.errorMessage(str(e))
 
     def enableButtons(self):
         self.but_name.setEnabled(True)
