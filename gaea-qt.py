@@ -82,22 +82,22 @@ class CommitPromptWindow(QtGui.QMainWindow):
     def commit(self):
         print "button clicked"
         message = str(self.editMessage.text())
-        print "msg is ", message, " toggle is ", self.t
-        try:       
+        print "msg is ", message
+#        try:       
         #if self.t == 0:
-            commit.snap('soft', message)
+        commit.snap('soft', message)
         # elif self.t == 1:
         #     commit.snap('hard', message)
-            self.parent.load()
-            self.close()
+        self.parent.load()
+        self.close()
 
-        except Exception, e:
-            print e
-            print "error"
-            msgBox = QtGui.QMessageBox() 
-            msgBox.setWindowTitle("Error!")
-            msgBox.setText(str(e))
-            msgBox.exec_()    
+#        except Exception, e:
+            # print e
+            # print "error"
+            # msgBox = QtGui.QMessageBox() 
+            # msgBox.setWindowTitle("Error!")
+            # msgBox.setText(str(e))
+            # msgBox.exec_()    
 
     # def softClick(self):
     #     self.t = 1 - self.t
@@ -128,19 +128,19 @@ class CloneWindow(QtGui.QMainWindow):
     def clone(self):
         print "button clicked"
         IP = str(self.editIP.text())
-        print "ip is ", IP
+       # print "ip is ", IP
         Path = str(self.editPath.text())
-        print "path is ", Path
+        #print "path is ", Path
         Name = str(self.editName.text())
-        print "name is ", Name
+        #print "name is ", Name
         Password = str(self.editPassword.text())
-        print "password is ", Password
+        #print "password is ", Password
         NewName = str(self.editNewName.text())
-        print "name is ", NewName
+        #print "name is ", NewName
         NewPassword = str(self.editNewPassword.text())
-        print "name is ", NewPassword
+        #print "name is ", NewPassword
         RootPassword = str(self.editRootPassword.text())
-        print "name is ", RootPassword
+        #print "name is ", RootPassword
 
 
 
@@ -265,17 +265,17 @@ class PeerWindow(QtGui.QMainWindow):
         if reply == QtGui.QMessageBox.Yes:
             print "pull from ", self.PeerSelected
             if len(self.PeerSelected) == 1:
-                #try:
-                ip = globals.PEERINFO['peers'].keys()[self.PeerSelected[0]]
-                name = globals.PEERINFO['peers'][ip]['username']
-                path = globals.PEERINFO['peers'][ip]['path']
-                password = globals.PEERINFO['peers'][ip]['password']
-                print ip, name, path, password
-                remote.pull(ip, path, name, password)
-                self.parent.load()
-                # except Exception, e:
-                #     print e
-                #     self.errorMessage(str(e))
+                try:
+                    ip = globals.PEERINFO['peers'].keys()[self.PeerSelected[0]]
+                    name = globals.PEERINFO['peers'][ip]['username']
+                    path = globals.PEERINFO['peers'][ip]['path']
+                    password = globals.PEERINFO['peers'][ip]['password']
+                    print ip, name, path, password
+                    remote.pull(ip, path, name, password)
+                    self.parent.load()
+                except Exception, e:
+                    print e
+                    self.errorMessage(str(e))
 
     def errorMessage(self,str):
         print "error"
@@ -338,7 +338,8 @@ class AddPeerWindow(QtGui.QMainWindow):
 class MyWindowClass(QtGui.QMainWindow, form_class):
     all_logs = []
     diffList = []
-
+    model_log = QtGui.QStandardItemModel()
+    model_diff = QtGui.QStandardItemModel()
     def __init__(self, parent=None):
         QtGui.QMainWindow.__init__(self, parent)
         self.setupUi(self)
@@ -415,11 +416,11 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
             self.diffList.remove(index.row())
             print "removed "
             print self.diffList
-            index.model().item(index.row()).setCheckState(QtCore.Qt.Unchecked)
+            index.model_log().item(index.row()).setCheckState(QtCore.Qt.Unchecked)
 
         elif index.row() not in self.diffList:
             self.diffList.append(index.row())
-            index.model().item(index.row()).setCheckState(QtCore.Qt.Checked)
+            index.model_log().item(index.row()).setCheckState(QtCore.Qt.Checked)
             print "appended "
             print self.diffList
         # itms = self.assetList.selectedIndexes()
@@ -449,7 +450,11 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
 
     def load(self):
         try:
+            self.model_log.clear()
+            self.model_diff.clear()
             print "load called"
+            self.list_commit.setModel(None)
+
             self.diffList = []
             repo.LoadRepo()   ### already a repo
             self.enableButtons()
@@ -508,7 +513,7 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
 
     def populateDiffInList(self,difference):
         print difference
-        model = QtGui.QStandardItemModel()
+        self.model_diff = QtGui.QStandardItemModel()
         for line in iter(difference.splitlines()):
             item = QtGui.QStandardItem(line)
             if len(line) > 0:
@@ -524,9 +529,9 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
             brush.setStyle(QtCore.Qt.SolidPattern)
             item.setForeground(brush)
             item.setEditable(False)
-            model.appendRow(item)
+            self.model_diff.appendRow(item)
        
-        self.list_diff.setModel(model)
+        self.list_diff.setModel(self.model_diff)
 
     def diff(self):
         print "diff called"
@@ -656,7 +661,7 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
             repo.LoadRepo()
             print "log starts"
             self.all_logs = repo.log()
-            model = QtGui.QStandardItemModel()
+            model_log = QtGui.QStandardItemModel()
             for i in self.all_logs:
                 item = QtGui.QStandardItem( i[0] +' ' +i[1] + ' '+ i[2] + ' '+ i[3])
                 if i[0] == globals.REPOINFO['HEAD']:
@@ -667,8 +672,8 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
                 item.setCheckState(check)
                 item.setCheckable(True)
                 item.setEditable(False)
-                model.appendRow(item)
-            self.list_commit.setModel(model)
+                model_log.appendRow(item)
+            self.list_commit.setModel(model_log)
         except Exception, e:
             print e
             self.errorMessage(str(e))
@@ -686,6 +691,7 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
     def managePeers(self):
         print "peer button pressed"
         try:
+            self.load()
             self.myOtherWindow = PeerWindow(self)
             self.myOtherWindow.show()
         except Exception, e:
