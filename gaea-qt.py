@@ -440,7 +440,7 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
     	self.txt_path1.setText(fname)
         globals.changeCWD(fname)
         print "ROOT name changed to ", fname
-        projectDir = fname
+        projectDir = str(fname)
         print globals.ROOT
         os.chdir(globals.ROOT)
         self.disableButtons()

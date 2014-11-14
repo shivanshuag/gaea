@@ -142,6 +142,12 @@ def mergeLines(filePathBase, filePathNew, filePathLatest, copyPath, f, new=False
     baseLines = helpers.readFile(filePathBase)
     newLines = helpers.readFile(filePathNew)
     latestLines = helpers.readFile(filePathLatest)
+    baseLines = [line.rstrip() for line in baseLines]
+    newLines = [line.rstrip() for line in newLines]
+    latestLines = [line.rstrip() for line in latestLines]
+    #print baseLines
+    #print newLines
+    #print latestLines
 
     mg = Merge3(baseLines, newLines, latestLines)
     merg = mg.merge_lines(name_a=filePathNew,name_b=filePathLatest,name_base=filePathBase)
