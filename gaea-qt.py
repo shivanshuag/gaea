@@ -83,21 +83,21 @@ class CommitPromptWindow(QtGui.QMainWindow):
         print "button clicked"
         message = str(self.editMessage.text())
         print "msg is ", message
-#        try:       
+        try:       
         #if self.t == 0:
-        commit.snap('soft', message)
+            commit.snap('soft', message)
         # elif self.t == 1:
         #     commit.snap('hard', message)
-        self.parent.load()
-        self.close()
+            self.parent.load()
+            self.close()
 
-#        except Exception, e:
-            # print e
-            # print "error"
-            # msgBox = QtGui.QMessageBox() 
-            # msgBox.setWindowTitle("Error!")
-            # msgBox.setText(str(e))
-            # msgBox.exec_()    
+        except Exception, e:
+            print e
+            print "error"
+            msgBox = QtGui.QMessageBox() 
+            msgBox.setWindowTitle("Error!")
+            msgBox.setText(str(e))
+            msgBox.exec_()    
 
     # def softClick(self):
     #     self.t = 1 - self.t
@@ -250,12 +250,13 @@ class PeerWindow(QtGui.QMainWindow):
 
     def pullAll(self):
         print "pull all button pressed"
-    #    try:
-        remote.pullAll()
-        self.parent.load()
-        # except Exception, e:
-        #     print e 
-        #     self.errorMessage(e)
+        try:
+            remote.pullAll()
+            self.parent.load()
+        except Exception, e:
+            print e 
+            self.parent.load()
+            self.errorMessage(e)
 
 
     def pull(self):
@@ -416,11 +417,11 @@ class MyWindowClass(QtGui.QMainWindow, form_class):
             self.diffList.remove(index.row())
             print "removed "
             print self.diffList
-            index.model_log().item(index.row()).setCheckState(QtCore.Qt.Unchecked)
+            index.model().item(index.row()).setCheckState(QtCore.Qt.Unchecked)
 
         elif index.row() not in self.diffList:
             self.diffList.append(index.row())
-            index.model_log().item(index.row()).setCheckState(QtCore.Qt.Checked)
+            index.model().item(index.row()).setCheckState(QtCore.Qt.Checked)
             print "appended "
             print self.diffList
         # itms = self.assetList.selectedIndexes()
