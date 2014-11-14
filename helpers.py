@@ -84,9 +84,4 @@ def goToN(repoInfo, n):
     return output
 
 def getIp():
-    try:
-        host = socket.gethostname()
-        ip = socket.gethostbyname(host)
-    except:
-        ip = raw_input("Give you hostname or IP address:")
-    return ip
+    return [(s.connect(('8.8.8.8', 80)), s.getsockname()[0], s.close()) for s in [socket.socket(socket.AF_INET, socket.SOCK_DGRAM)]][0][1]
