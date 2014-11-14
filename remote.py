@@ -123,7 +123,7 @@ def pull(ip, path, username, password):
     globals.ROOT = previousRoot
     os.chdir(globals.ROOT)
     #dump the updated peerinfo back to repo
-    helpers.dump(globals.PEERINFO)
+    helpers.dumpPeerDirec(globals.PEERINFO)
     conflicts, conflictCount = merge(pullPath, (ip+":"+path))
     if conflictCount > 0:
         s =  "Total "+str(conflictCount)+" conflicts in merge\nFix them and take a snapshot before running pull again"
@@ -165,6 +165,7 @@ def mergeLines(filePathBase, filePathNew, filePathLatest, copyPath, f, new=False
 
 def merge(pullPath, address):
     conflictCount = 0
+    conflicts = ''
     remoteYaml = os.path.join(pullPath, os.listdir(pullPath)[0], '.gaea', 'gaea.yml');
     if os.path.exists(remoteYaml):
         f = open(remoteYaml)
@@ -202,8 +203,10 @@ def merge(pullPath, address):
             filePathBase = os.path.join(root, f)
             filePathNew = os.path.join(newPath, os.path.relpath(root, basePath), f)
             filePathLatest = os.path.join(latestPath, os.path.relpath(root, basePath), f)
-            if mergeLines(filePathBase, filePathNew, filePathLatest, copyPath, f):
+            c,boo =  mergeLines(filePathBase, filePathNew, filePathLatest, copyPath, f)
+            if boo:
                 conflictCount += 1
+                conflicts += c
 
     #merge files only in new
     for root, subFolders, files in os.walk(newPath):
@@ -218,8 +221,10 @@ def merge(pullPath, address):
                 filePathBase = os.path.join(basePath, os.path.relpath(root, newPath), f)
                 filePathNew = os.path.join(root, f)
                 filePathLatest = os.path.join(latestPath, os.path.relpath(root, newPath), f)
-                if mergeLines(filePathBase, filePathNew, filePathLatest, copyPath, f, new=True):
+                c, boo = mergeLines(filePathBase, filePathNew, filePathLatest, copyPath, f, new=True)
+                if boo:
                     conflictCount += 1
+                    conflicts += c
 
     #merge files only in latest
     for root, subFolders, files in os.walk(latestPath):
@@ -234,9 +239,11 @@ def merge(pullPath, address):
                 filePathBase = os.path.join(basePath, os.path.relpath(root, newPath), f)
                 filePathNew = os.path.join(newPath, os.path.relpath(root,newPath), f)
                 filePathLatest = os.path.join(root, f)
-                if mergeLines(filePathBase, filePathNew, filePathLatest, copyPath, f):
+                x, boo = mergeLines(filePathBase, filePathNew, filePathLatest, copyPath, f)
+                if boo:
                     conflictCount += 1
-    return conflictCount
+                    conflicts += c
+    return conflicts,conflictCount
 
 def addPeer(ip, path, username, password):
     globals.PEERINFO['peers'].update({ip:{'path':path, 'username':username, 'password':password}})
