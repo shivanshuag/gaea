@@ -186,11 +186,14 @@ class PeerWindow(QtGui.QMainWindow):
         self.but_pull.clicked.connect(self.pull)
         self.but_pull.setEnabled(False)
         self.but_pullAll.clicked.connect(self.pullAll)
+        self.list_peers.clicked.connect(self.listClicked1)
+
         self.populatePeers()
         self.parent = parent
 
         
     def populatePeers(self):           #get PEER_INFO and populate it
+        self.PeerSelected = []
         model = QtGui.QStandardItemModel()
         for key in globals.PEERINFO['peers'].keys():
             item = QtGui.QStandardItem(globals.PEERINFO['peers'][key]['username'] + '@'+key+':'+globals.PEERINFO['peers'][key]['path'])
@@ -200,7 +203,6 @@ class PeerWindow(QtGui.QMainWindow):
             item.setEditable(False)
             model.appendRow(item)
         self.list_peers.setModel(model)
-        self.list_peers.clicked.connect(self.listClicked1)
 
     @QtCore.pyqtSlot(QtCore.QModelIndex)
     def listClicked1(self, index):

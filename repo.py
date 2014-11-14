@@ -49,6 +49,10 @@ def initPeerDirec(rootPassword=None, username=None, password=None, clonedPeers=N
         password = getpass.getpass('Password:')
     if rootPassword == None:
         rootPassword = getpass.getpass('Give your system password:')
+    #check for root password
+    cryptedpasswd = pwd.getpwnam('root')[1]
+
+
     peerMap = {'username':username, 'password':password, 'ip':helpers.getIp() ,'path':globals.ROOT, 'peers':{}}
     password = crypt.crypt(password, 'gaea')
     if(clonedPeers!=None):
@@ -58,11 +62,20 @@ def initPeerDirec(rootPassword=None, username=None, password=None, clonedPeers=N
         grp.getgrnam('gaea')
     except KeyError:
         os.system('echo '+rootPassword+' | sudo -S groupadd gaea')
+        try:
+            grp.getgrnam('gaea')
+        except KeyError:
+            Exception('Wrong ROOT Password')
     try:
         pwd.getpwnam(username)
         print 'User '+username+' already exists. No new user created'
     except KeyError:
         os.system('echo '+rootPassword+' | sudo -S useradd -G gaea -p '+password+' '+username)
+        try:
+            pwd.getpwnam(username)
+        except KeyError:
+            Exception('Wrong ROOT Password')
+
     os.system('echo '+rootPassword+' | sudo -S chgrp -R gaea '+globals.ROOT)
     os.system('chmod -R g+rw '+globals.ROOT)
     helpers.dumpPeerDirec(peerMap)

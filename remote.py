@@ -124,10 +124,11 @@ def pull(ip, path, username, password):
     os.chdir(globals.ROOT)
     #dump the updated peerinfo back to repo
     helpers.dump(globals.PEERINFO)
-    conflictCount = merge(pullPath, (ip+":"+path))
+    conflicts, conflictCount = merge(pullPath, (ip+":"+path))
     if conflictCount > 0:
-        print "Total "+str(conflictCount)+" conflicts in merge\nFix them and take a snapshot before running pull again"
-        raise Exception("Merge Conflict in "+username+'@'+ip+':'+path)
+        s =  "Total "+str(conflictCount)+" conflicts in merge\nFix them and take a snapshot before running pull again"
+        print s
+        raise Exception("Merge Conflict in "+username+'@'+ip+':'+path + "\nFix them and take a snapshot before running pull again" + conflicts)
     else:
         if repo.diff():
             commit.snap('hard', "Merged HEAD from "+ (ip+":"+path))
@@ -135,6 +136,7 @@ def pull(ip, path, username, password):
 
 def mergeLines(filePathBase, filePathNew, filePathLatest, copyPath, f, new=False):
     conflict = False
+    conflicts = ''
     baseLines = helpers.readFile(filePathBase)
     newLines = helpers.readFile(filePathNew)
     latestLines = helpers.readFile(filePathLatest)
@@ -145,7 +147,9 @@ def mergeLines(filePathBase, filePathNew, filePathLatest, copyPath, f, new=False
     #print merged
     if merged:
         if '<<<<<<<' in merged:
-            print 'Merge conflict in file '+ os.path.join(copyPath,f)
+            s = 'Merge conflict in file '+ os.path.join(copyPath,f)
+            print s
+            conflicts = conflicts + '\n' + s
             conflict = True
         else:
             print 'Merged without conflict '+ os.path.join(copyPath,f)
@@ -156,7 +160,7 @@ def mergeLines(filePathBase, filePathNew, filePathLatest, copyPath, f, new=False
         f.close()
     elif new:
         print 'Deleting file after merge '+ os.path.join(copyPath,f)
-    return conflict
+    return conflicts, conflict
 
 
 def merge(pullPath, address):
